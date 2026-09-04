@@ -281,7 +281,7 @@ necesita en Linux, que es el sistema base del contenedor Docker definido en el
 ### El nombre de la capa convolucional es un parámetro
 
 `"conv10_thisone"` estaba incrustado en el cuerpo de `grad_cam()`. Como el
-proyecto contempla dos modelos distintos (`conv_MLP_84.h5` y `WilhemNet86.h5`)
+proyecto contempla dos modelos distintos (`conv_MLP_84.h5`)
 cuyas capas no tienen por qué llamarse igual, el nombre pasó a ser un parámetro
 con valor por defecto.
 

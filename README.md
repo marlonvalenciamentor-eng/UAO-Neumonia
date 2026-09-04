@@ -79,7 +79,7 @@ UAO-Neumonia/
 └── README.md
 ```
 
-Los archivos de pesos (`conv_MLP_84.h5`, `WilhemNet86.h5`) y las salidas de la
+Los archivos de pesos (`conv_MLP_84.h5`) y las salidas de la
 aplicación (`historial.csv`, `Reporte*.pdf`) están excluidos del repositorio.
 
 ---
