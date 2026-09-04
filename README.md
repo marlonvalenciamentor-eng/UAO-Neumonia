@@ -32,7 +32,7 @@ mediante un mapa de calor Grad-CAM superpuesto sobre la imagen original.
 - [Errores corregidos del código base](#errores-corregidos-del-código-base)
 - [Limitaciones conocidas](#limitaciones-conocidas)
 - [Licencia](#licencia)
-- [Autores](#autores)
+- [Autores]- Marlon Valencia Velosa — [@marlonvalenciamentor-eng](https://github.com/marlonvalenciamentor-eng)
 
 ---
 
@@ -219,8 +219,7 @@ procesamiento por lotes.
 4. **PDF** — genera un reporte con captura de la ventana.
 5. **Borrar** — limpia la interfaz para un nuevo caso.
 
-<!-- Reemplace por su propia captura: guárdela en docs/captura.png -->
-<!-- ![Interfaz de la aplicación](docs/captura.png) -->
+![Interfaz de la aplicación](docs/captura.png)
 
 ---
 
@@ -316,13 +315,13 @@ Keras 3, que es la versión que acompaña a TensorFlow 2.21. Se resolvió instal
 
 ## Limitaciones conocidas
 
-**El mapa de calor puede activarse fuera del área pulmonar.** En imágenes que son
-fotografías de radiografías impresas —con marco, rotación y artefactos de borde—
-se observaron activaciones concentradas en las esquinas y el contorno de la placa,
-no en el parénquima pulmonar, pese a arrojar probabilidades superiores al 85 %.
-Una predicción con esas características **no es confiable**, y es precisamente lo
-que Grad-CAM permite detectar. Se recomienda verificar el mapa de calor antes de
-considerar válido cualquier resultado.
+**La calidad del mapa de calor depende de la calidad de la imagen.** En
+radiografías digitales limpias, las activaciones se concentran en los campos
+pulmonares, como corresponde. En imágenes que son fotografías de placas
+impresas —con marco, rotación y artefactos de borde— se observaron
+activaciones en las esquinas y el contorno, pese a arrojar probabilidades
+superiores al 85 %. Grad-CAM permite distinguir ambos casos: una predicción
+con activaciones fuera del área pulmonar no debe considerarse confiable.
 
 **Advertencias residuales de dependencias.** Persisten tres advertencias de
 deprecación emitidas por `tf-keras` y `gast`, ambas dependencias internas de
