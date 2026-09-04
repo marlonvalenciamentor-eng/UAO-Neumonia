@@ -219,7 +219,7 @@ procesamiento por lotes.
 4. **PDF** — genera un reporte con captura de la ventana.
 5. **Borrar** — limpia la interfaz para un nuevo caso.
 
-![Interfaz de la aplicación](docs/captura.png)
+![Interfaz de la aplicación](docs/Captura.png)
 
 ---
 
