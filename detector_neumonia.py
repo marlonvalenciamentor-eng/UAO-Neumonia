@@ -1,22 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"   # tf-keras: los .h5 son de Keras 2
+
 from tkinter import *
 from tkinter import ttk, font, filedialog, Entry
-
 from tkinter.messagebox import askokcancel, showinfo, WARNING
 import getpass
 from PIL import ImageTk, Image
 import csv
 import pyautogui
+import compat_tix
 import tkcap
 import img2pdf
 import numpy as np
 import time
+import tensorflow as tf          # <-- error 2: faltaba este import
+
 tf.compat.v1.disable_eager_execution()
 tf.compat.v1.experimental.output_all_intermediates(True)
-import cv2
 
+import cv2
+import pydicom as dicom
+from tensorflow.keras import backend as K
+
+def model_fun():
+    """Carga el modelo entrenado de deteccion de neumonia."""
+    return tf.keras.models.load_model("conv_MLP_84.h5")
 
 def grad_cam(array):
     img = preprocess(array)
@@ -68,7 +79,7 @@ def predict(array):
 
 
 def read_dicom_file(path):
-    img = dicom.read_file(path)
+    img = dicom.dcmread(path)
     img_array = img.pixel_array
     img2show = Image.fromarray(img_array)
     img2 = img_array.astype(float)
@@ -195,7 +206,7 @@ class App:
         )
         if filepath:
             self.array, img2show = read_dicom_file(filepath)
-            self.img1 = img2show.resize((250, 250), Image.ANTIALIAS)
+            self.img1 = img2show.resize((250, 250), Image.Resampling.LANCZOS)
             self.img1 = ImageTk.PhotoImage(self.img1)
             self.text_img1.image_create(END, image=self.img1)
             self.button1["state"] = "enabled"
@@ -203,7 +214,7 @@ class App:
     def run_model(self):
         self.label, self.proba, self.heatmap = predict(self.array)
         self.img2 = Image.fromarray(self.heatmap)
-        self.img2 = self.img2.resize((250, 250), Image.ANTIALIAS)
+        self.img2 = self.img2.resize((250, 250), Image.Resampling.LANCZOS)
         self.img2 = ImageTk.PhotoImage(self.img2)
         print("OK")
         self.text_img2.image_create(END, image=self.img2)
