@@ -137,3 +137,7 @@ WilhemNet86.h5
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Salidas de la aplicacion
+historial.csv
+Reporte*.pdf
