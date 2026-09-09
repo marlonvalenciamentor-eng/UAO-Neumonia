@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 6 items
+
+test/test_read_img.py::test_read_dicom_valid PASSED                      [ 16%]
+test/test_read_img.py::test_read_dicom_not_found PASSED                  [ 33%]
+test/test_read_img.py::test_read_jpg_valid PASSED                        [ 50%]
+test/test_read_img.py::test_read_jpg_not_found PASSED                    [ 66%]
+test/test_read_img.py::test_read_file_auto_detect_dicom PASSED           [ 83%]
+test/test_read_img.py::test_read_file_auto_detect_jpg PASSED             [100%]
+
+============================== 6 passed in 0.21s ===============================
