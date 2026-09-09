@@ -1,7 +1,8 @@
-.PHONY: help run test test-all test-read test-preprocess test-model test-gradcam test-integrator clean
-
+.PHONY: help run test test-all test-read test-preprocess test-model test-gradcam test-integrator commit clean
+SHELL := /bin/bash
 TIMESTAMP := $(shell date +"%Y-%m-%d_%H-%M-%S")
 MODULE ?= all
+
 
 help:
 	@echo "Comandos disponibles:"
@@ -49,4 +50,15 @@ test-integrator:
 
 clean:
 	rm -rf __pycache__ .pytest_cache src/__pycache__ test/__pycache__ *.pyc
+
+commit:
+	@git status -s
+	@echo "----------------------------------------"
+	@if [ -z "$(m)" ]; then \
+		read -p "Escribe el mensaje del commit: " msg; \
+		git add . && git commit -m "$$msg"; \
+	else \
+		git add . && git commit -m "$(m)"; \
+	fi
+
 
