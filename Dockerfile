@@ -24,7 +24,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # 6. Sincronizar el entorno virtual con UV de forma determinista
-RUN uv sync --frozen --no-cache
+RUN uv sync --frozen --no-install-project --no-cache
 
 # 7. Copiar el código fuente y demás archivos del proyecto
 COPY . .
