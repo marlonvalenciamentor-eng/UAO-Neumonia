@@ -25,7 +25,24 @@ OBJETIVOS ESPECÍFICOS POR FUNCIÓN:
 """
 
 import os
-import tensorflow as tf
+import sys
+
+# Silenciar mensajes informativos y de advertencia de TensorFlow/CUDA a nivel de C++
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+_stderr_fd = sys.stderr.fileno()
+_saved_stderr = os.dup(_stderr_fd)
+_devnull = os.open(os.devnull, os.O_WRONLY)
+os.dup2(_devnull, _stderr_fd)
+os.close(_devnull)
+
+try:
+    import tensorflow as tf
+finally:
+    os.dup2(_saved_stderr, _stderr_fd)
+    os.close(_saved_stderr)
+
 
 
 def validate_model_integrity(model: tf.keras.Model, required_layer: str = "conv10_thisone") -> bool:

@@ -1,64 +1,95 @@
 """
 Pruebas unitarias para el Módulo 5: integrator.py
+Valida la orquestación integral del pipeline de diagnóstico, caché y puente de interfaz.
 """
 import pytest
 import numpy as np
 from PIL import Image
 
 from src.integrator import process_and_diagnose, predict, get_or_load_model
-from src.read_img import read_dicom_file
 
-SAMPLE_DICOM = "data/DICOM/normal (2).dcm"
-SAMPLE_JPG = "data/JPG/normal/NORMAL2-IM-1145-0001.jpeg"
+REAL_SAMPLES = [
+    "data/DICOM/normal (2).dcm",
+    "data/DICOM/normal (3).dcm",
+    "data/DICOM/viral (2).dcm",
+    "data/DICOM/viral (3).dcm",
+    "data/JPG/normal/NORMAL2-IM-1144-0001.jpeg",
+    "data/JPG/normal/NORMAL2-IM-1145-0001.jpeg",
+]
 
 
-def test_process_and_diagnose_dicom_path():
-    """Valida la orquestación completa recibiendo una ruta de archivo DICOM."""
-    results = process_and_diagnose(SAMPLE_DICOM)
+# 1. Pruebas de orquestación completa con rutas de archivos reales (6 pruebas)
+@pytest.mark.parametrize("sample_path", REAL_SAMPLES)
+def test_process_and_diagnose_real_files(sample_path):
+    """Valida la ejecución del pipeline completo de principio a fin."""
+    results = process_and_diagnose(sample_path)
 
-    assert isinstance(results, dict), "Debe retornar un diccionario"
+    assert isinstance(results, dict)
     assert results["label"] in ["bacteriana", "normal", "viral"]
     assert 0.0 <= results["probability"] <= 100.0
     assert isinstance(results["heatmap"], np.ndarray)
+    assert results["heatmap"].shape == (512, 512, 3)
     assert isinstance(results["display_image"], Image.Image)
 
 
-def test_process_and_diagnose_jpg_path():
-    """Valida la orquestación completa recibiendo una ruta de archivo JPG."""
-    results = process_and_diagnose(SAMPLE_JPG)
-
-    assert results["label"] in ["bacteriana", "normal", "viral"]
-    assert 0.0 <= results["probability"] <= 100.0
-    assert results["heatmap"].shape == (512, 512, 3)
-
-
-def test_process_and_diagnose_numpy_array():
-    """Valida la orquestación recibiendo una matriz NumPy ya en memoria."""
-    array, _ = read_dicom_file(SAMPLE_DICOM)
-    results = process_and_diagnose(array)
+# 2. Pruebas de orquestación con arreglos NumPy en memoria (3 pruebas)
+@pytest.mark.parametrize(
+    "shape",
+    [(128, 128, 3), (256, 256, 3), (512, 512, 3)],
+    ids=["128x128", "256x256", "512x512"],
+)
+def test_process_and_diagnose_memory_arrays(shape):
+    """Valida orquestación cuando se entrega directamente un array en RAM."""
+    dummy_arr = np.random.randint(20, 220, size=shape, dtype=np.uint8)
+    results = process_and_diagnose(dummy_arr)
 
     assert results["label"] in ["bacteriana", "normal", "viral"]
     assert isinstance(results["heatmap"], np.ndarray)
 
 
-def test_predict_bridge_function():
-    """Valida la función puente predict(array) que usa la interfaz gráfica."""
-    array, _ = read_dicom_file(SAMPLE_DICOM)
-    label, proba, heatmap = predict(array)
+# 3. Pruebas de la función puente predict() para la GUI (3 pruebas)
+@pytest.mark.parametrize(
+    "shape",
+    [(200, 200, 3), (512, 512, 3), (400, 400)],
+    ids=["200x200", "512x512", "400x400_gray"],
+)
+def test_predict_bridge_function(shape):
+    """Valida la compatibilidad del puente predict(array) con la interfaz gráfica."""
+    dummy = np.ones(shape, dtype=np.uint8) * 128
+    label, proba, heatmap = predict(dummy)
 
     assert label in ["bacteriana", "normal", "viral"]
     assert isinstance(proba, float)
     assert isinstance(heatmap, np.ndarray)
 
 
-def test_invalid_input_type():
-    """Valida que capture entradas que no sean ni str ni ndarray."""
+# 4. Prueba de reutilización y caché del modelo (1 prueba)
+def test_model_caching_singleton():
+    """Valida que get_or_load_model no recargue el archivo del disco repetidamente."""
+    model_a = get_or_load_model()
+    model_b = get_or_load_model()
+    assert model_a is model_b, "Debe retornar la misma referencia de modelo"
+
+
+# 5. Pruebas de tipos de entrada inválidos (4 pruebas)
+@pytest.mark.parametrize(
+    "invalid_data",
+    [None, 9999, [1, 2, 3], {"clave": "valor"}],
+    ids=["None", "int", "list", "dict"],
+)
+def test_process_and_diagnose_invalid_types(invalid_data):
+    """Valida que tipos no soportados disparen TypeError."""
     with pytest.raises(TypeError):
-        process_and_diagnose(12345)
+        process_and_diagnose(invalid_data)
 
 
-def test_model_caching():
-    """Valida que el modelo se mantenga en memoria y retorne la misma instancia."""
-    model_1 = get_or_load_model()
-    model_2 = get_or_load_model()
-    assert model_1 is model_2, "Debe ser la misma instancia en caché"
+# 6. Pruebas de rutas de archivo inexistentes (3 pruebas)
+@pytest.mark.parametrize(
+    "missing_path",
+    ["no_existe/radiografia.dcm", "falsa/imagen.jpg", "error/foto.png"],
+    ids=["dcm_err", "jpg_err", "png_err"],
+)
+def test_process_and_diagnose_missing_files(missing_path):
+    """Valida que rutas que no existen disparen FileNotFoundError."""
+    with pytest.raises(FileNotFoundError):
+        process_and_diagnose(missing_path)

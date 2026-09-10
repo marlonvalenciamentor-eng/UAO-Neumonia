@@ -1,3 +1,10 @@
 conv_MLP_84.h5
 WilhemNet86.h5
 .venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+reports/*.log
+historial.csv
+Reporte*.pdf
+detector_neumonia_orig.py

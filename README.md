@@ -31,6 +31,10 @@ El código base original (monolítico, legado para Windows y TensorFlow 1.x) fue
 4. **Automatización Integral del Ciclo de Vida (Makefile + UV):**
    * Gestión estricta de dependencias sin PIP (`uv.lock`).
    * Comandos automatizados para ejecución, suite de pruebas unitarias (`pytest`), reportes fechados automáticos y control de versiones Git.
+5. **Limpieza Estricta y Supresión de Warnings (0 Warnings):**
+   * Eliminación del `UserWarning` de Keras 3 corrigiendo la estructura de entrada de tensores en `grad_cam.py` (`[batch_tensor]`).
+   * Supresión de los mensajes informativos de C++ y CUDA (`stderr` redirection a nivel de descriptor de archivo de sistema operativo), logrando una ejecución limpia y profesional en consola.
+
 
 ---
 

@@ -1,6 +1,8 @@
-.PHONY: help run test test-all test-read test-preprocess test-model test-gradcam test-integrator commit clean
+.PHONY: help run test test-all test-read test-preprocess test-model test-gradcam test-integrator test-gui commit clean
 SHELL := /bin/bash
+export PATH := $(HOME)/.local/bin:$(PATH)
 TIMESTAMP := $(shell date +"%Y-%m-%d_%H-%M-%S")
+
 MODULE ?= all
 
 
@@ -13,10 +15,13 @@ help:
 	@echo "  make test-model       - Prueba Módulo 3 (load_model)"
 	@echo "  make test-gradcam     - Prueba Módulo 4 (grad_cam)"
 	@echo "  make test-integrator  - Prueba Módulo 5 (integrator)"
+	@echo "  make test-gui         - Prueba la interfaz gráfica (detector_neumonia)"
 	@echo "  make clean            - Limpia archivos temporales y cachés"
+	@echo "  make commit           - Guarda los cambios en Git (opcional: m=\"mensaje\")"
 
 run:
-	uv run src/detector_neumonia.py
+	PYTHONPATH=. uv run src/detector_neumonia.py
+
 
 test:
 	@mkdir -p reports
@@ -61,4 +66,6 @@ commit:
 		git add . && git commit -m "$(m)"; \
 	fi
 
+test-gui:
+	@$(MAKE) test MODULE=detector_neumonia
 

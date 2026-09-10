@@ -43,6 +43,10 @@ def preprocess_image(array: np.ndarray) -> np.ndarray:
     if array.size == 0 or len(array.shape) < 2:
         raise ValueError("El arreglo de entrada está vacío o no tiene dimensiones de imagen válidas.")
 
+    # Asegurar compatibilidad de tipo de dato con OpenCV resize (CV_8U, CV_16U, CV_32F, CV_64F)
+    if array.dtype not in (np.uint8, np.uint16, np.float32, np.float64):
+        array = array.astype(np.float32)
+
     # 3. Redimensionamiento espacial estándar (512 x 512)
     resized = cv2.resize(array, (512, 512), interpolation=cv2.INTER_AREA)
 
