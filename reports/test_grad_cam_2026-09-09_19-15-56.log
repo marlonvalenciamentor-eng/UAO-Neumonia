@@ -11,4 +11,14 @@ test/test_grad_cam.py::test_predict_and_explain_jpg PASSED               [ 50%]
 test/test_grad_cam.py::test_generate_gradcam_heatmap_dimensions PASSED   [ 75%]
 test/test_grad_cam.py::test_predict_invalid_layer PASSED                 [100%]
 
-============================== 4 passed in 4.57s ===============================
+=============================== warnings summary ===============================
+test/test_grad_cam.py::test_predict_and_explain_dicom
+test/test_grad_cam.py::test_predict_and_explain_jpg
+test/test_grad_cam.py::test_generate_gradcam_heatmap_dimensions
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/keras/src/models/functional.py:259: UserWarning: The structure of `inputs` doesn't match the expected structure.
+  Expected: ['input_9']
+  Received: inputs=Tensor(shape=(1, 512, 512, 1))
+    warnings.warn(msg)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 4 passed, 3 warnings in 4.53s =========================
