@@ -20,20 +20,21 @@ help:
 	@echo "  make commit           - Guarda los cambios en Git (opcional: m=\"mensaje\")"
 
 run:
-	PYTHONPATH=. uv run src/detector_neumonia.py
+	PYTHONPATH=. uv run --no-project src/detector_neumonia.py
 
 
 test:
 	@mkdir -p reports
 ifeq ($(MODULE),all)
-	PYTHONPATH=. uv run pytest test/ -v | tee reports/test_all_$(TIMESTAMP).log
+	PYTHONPATH=. uv run --no-project pytest test/ -v | tee reports/test_all_$(TIMESTAMP).log
 	@cp reports/test_all_$(TIMESTAMP).log reports/latest.log
 	@echo "📁 Reporte guardado: reports/test_all_$(TIMESTAMP).log"
 else
-	PYTHONPATH=. uv run pytest test/test_$(MODULE).py -v | tee reports/test_$(MODULE)_$(TIMESTAMP).log
+	PYTHONPATH=. uv run --no-project pytest test/test_$(MODULE).py -v | tee reports/test_$(MODULE)_$(TIMESTAMP).log
 	@cp reports/test_$(MODULE)_$(TIMESTAMP).log reports/latest.log
 	@echo "📁 Reporte guardado: reports/test_$(MODULE)_$(TIMESTAMP).log"
 endif
+
 
 test-all:
 	@$(MAKE) test MODULE=all

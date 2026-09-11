@@ -212,3 +212,44 @@ def test_patient_entry_var_binding(app_instance):
     """Valida que la variable Tkinter esté ligada al campo de entrada."""
     app_instance.patient_id_var.set("CC-445566")
     assert app_instance.entry_patient_id.get() == "CC-445566"
+
+
+# 7. Pruebas del Sistema de Diseño y UI Moderna (Fases 1-6)
+def test_gui_responsive_minsize(app_instance):
+    """Valida que la ventana tenga un tamaño mínimo responsive configurado."""
+    minsize = app_instance.root.minsize()
+    assert minsize[0] >= 800
+    assert minsize[1] >= 600
+
+
+def test_gui_image_labels_empty_state(app_instance):
+    """Valida que los paneles de imagen utilicen ttk.Label y tengan empty state descriptivo."""
+    from tkinter import ttk
+    assert isinstance(app_instance.label_img1, ttk.Label)
+    assert isinstance(app_instance.label_img2, ttk.Label)
+    assert "Sin radiografía" in app_instance.label_img1.cget("text")
+    assert "Grad-CAM" in app_instance.label_img2.cget("text")
+
+
+def test_gui_progress_bar_exists(app_instance):
+    """Valida que exista la barra de progreso indeterminada para feedback clínico."""
+    from tkinter import ttk
+    assert hasattr(app_instance, "progress")
+    assert isinstance(app_instance.progress, ttk.Progressbar)
+    assert str(app_instance.progress.cget("mode")) == "indeterminate"
+
+
+
+def test_gui_shortcuts_registered(app_instance):
+    """Valida que los atajos de accesibilidad estén enlazados a la ventana."""
+    bound_keys = [app_instance.root.bind(k) for k in ["<Control-o>", "<Return>", "<Control-s>", "<Escape>"]]
+    assert all(bound is not None and bound != "" for bound in bound_keys)
+
+
+def test_gui_predict_without_image_warns(app_instance):
+    """Valida que predecir sin imagen muestre una advertencia amigable sin tronar."""
+    app_instance.array = None
+    with patch("src.detector_neumonia.showwarning") as mock_warn:
+        app_instance.run_prediction()
+        mock_warn.assert_called_once()
+

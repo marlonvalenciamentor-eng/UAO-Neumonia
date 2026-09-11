@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.21-FF6F00?logo=tensorflow&logoColor=white)
 ![uv](https://img.shields.io/badge/gestor-uv-DE5FE9?logo=astral&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-121%20passed-12695E?logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/pytest-126%20passed-12695E?logo=pytest&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/licencia-MIT-yellow?logo=open-source-initiative&logoColor=white)
 
@@ -24,7 +24,7 @@ Herramienta de apoyo al diagnóstico médico que clasifica radiografías de tór
 - [Ejecución](#ejecución)
 - [Ejecución con Docker](#ejecución-con-docker)
 - [Uso de la aplicación](#uso-de-la-aplicación)
-- [Pruebas (121 Tests)](#pruebas-121-tests)
+- [Pruebas (126 Tests)](#pruebas-126-tests)
 - [Módulos](#módulos)
 - [Decisiones de diseño](#decisiones-de-diseño)
 - [Errores corregidos del código base](#errores-corregidos-del-código-base)
@@ -40,9 +40,11 @@ Herramienta de apoyo al diagnóstico médico que clasifica radiografías de tór
 - **Preprocesamiento Clínico y Morfológico**: Redimensionamiento espacial estándar (512×512), conversión monocromática de 1 canal, ecualización adaptativa de histograma de contraste limitado (**CLAHE**) y normalización numérica en rango flotante `[0.0, 1.0]`.
 - **Inferencia Convolucional Optimizada**: Integración con la red entrenada (`conv_MLP_84.h5` / `WilhemNet86.h5`), validando la presencia de capas críticas (`conv10_thisone`).
 - **Explicabilidad Médica con Grad-CAM**: Reescritura moderna sobre **`tf.GradientTape`** en modo *Eager Execution*, eliminando el modo estático de grafos y las advertencias de deprecación.
+- **Interfaz Médica Responsiva y Accesible**: Diseño moderno basado en `ttk.Style` con layout `grid` fluido, empty states informativos, barra de progreso animada durante inferencia, prevención y diálogo amigable de errores clínicos, y atajos de teclado (`Ctrl+O`, `Enter`, `Ctrl+S`, `Esc`).
 - **Reportes Clínicos Nativos en PDF**: Composición gráfica en memoria mediante Pillow (`PIL`) con tipografías vectoriales TrueType, eliminando dependencias obsoletas (`tkcap`) e incompatibilidades con servidores gráficos Wayland en Linux y contenedores Docker.
 - **Persistencia en Historial CSV**: Registro histórico ordenado con identificador del paciente, marca temporal precisa, patología detectada y probabilidad porcentual.
-- **Aseguramiento de Calidad Exhaustivo**: Suite de **121 pruebas unitarias** estructuradas con `pytest`, ejecutables de forma desatendida (*headless*) en menos de 25 segundos y con archivo automático de evidencias PDF en `reports/evidencias_pdf/`.
+- **Aseguramiento de Calidad Exhaustivo**: Suite de **126 pruebas unitarias** estructuradas con `pytest`, ejecutables de forma desatendida (*headless*) en menos de 28 segundos y con archivo automático de evidencias PDF en `reports/evidencias_pdf/`.
+
 
 ---
 
@@ -213,18 +215,19 @@ El contenedor ejecutará de forma hermética la suite completa de 121 pruebas un
 
 ## Uso de la aplicación
 
-1. **Cargar Imagen**: Permite seleccionar una radiografía en formato DICOM (`.dcm`) o estándar (`.jpeg`, `.png`). Muestra la imagen en la vista izquierda.
-2. **Identificador del Paciente**: Ingrese el número de historia clínica o documento de identidad en el campo superior.
-3. **Predecir**: Ejecuta la inferencia matemática. En la etiqueta superior se actualiza el diagnóstico (*Normal*, *Neumonía Bacteriana* o *Neumonía Viral*) junto al porcentaje de certeza médica, y en el panel derecho se superpone el mapa **Grad-CAM**.
-4. **Guardar**: Añade el registro con fecha y hora al archivo `historial.csv`.
+1. **Cargar Imagen (`Ctrl+O`)**: Permite seleccionar una radiografía en formato DICOM (`.dcm`) o estándar (`.jpeg`, `.png`). Muestra la imagen en el panel izquierdo con redimensionamiento dinámico y validación de errores.
+2. **Identificador del Paciente**: Ingrese el número de historia clínica o documento de identidad en el campo correspondiente.
+3. **Predecir (`Enter`)**: Ejecuta la inferencia activando una barra de progreso animada mientras la CNN procesa. El resultado se despliega en un campo seguro de solo lectura y en el panel derecho se superpone el mapa de activación **Grad-CAM**.
+4. **Guardar CSV (`Ctrl+S`)**: Añade el registro con fecha y hora al archivo `historial.csv`.
 5. **Generar PDF**: Compone en memoria el informe clínico oficial de alta resolución con banner institucional y lo guarda como `Reporte_X.pdf`.
-6. **Borrar**: Limpia el formulario y desactiva los controles para un nuevo análisis.
+6. **Borrar (`Esc`)**: Limpia el formulario y desactiva los controles para un nuevo análisis mediante confirmación modal.
+
 
 ---
 
-## Pruebas (121 Tests)
+## Pruebas (126 Tests)
 
-El proyecto cuenta con una suite integral de **121 pruebas unitarias** implementadas con **`pytest`**, superando la meta de 120 pruebas de la rúbrica:
+El proyecto cuenta con una suite integral de **126 pruebas unitarias** implementadas con **`pytest`**, superando la meta de 120 pruebas de la rúbrica:
 
 ```bash
 make test
@@ -239,8 +242,9 @@ make test
 | `test/test_load_model.py` | **15** | Validación dimensional `(None, 512, 512, 1)`, capas de salida, verificación de capa convolucional `conv10_thisone` y captura de capas erróneas. | `make test-model` |
 | `test/test_grad_cam.py` | **15** | Inferencia diagnóstica, normalización de mapas de activación (512×512) y manejo defensivo de entradas sintéticas. | `make test-gradcam` |
 | `test/test_integrator.py` | **20** | Pipeline completo E2E, patrón Singleton de reutilización del modelo y validación de contrato de diccionario. | `make test-integrator` |
-| `test/test_detector_neumonia.py` | **20** | Ciclo de vida GUI sin bucles infinitos, guardado CSV multi-paciente, exportación de PDFs y archivado de evidencias en `reports/evidencias_pdf/`. | `make test-gui` |
-| **TOTAL** | **121** | **100% de Pruebas Aprobadas (121 PASSED en ~23 segundos)** | `make test` |
+| `test/test_detector_neumonia.py` | **25** | Ciclo de vida GUI sin bucles infinitos, guardado CSV multi-paciente, exportación de PDFs, archivado en `reports/evidencias_pdf/`, responsive minsize, barra de progreso y atajos. | `make test-gui` |
+| **TOTAL** | **126** | **100% de Pruebas Aprobadas (126 PASSED en ~27 segundos)** | `make test` |
+
 
 ---
 

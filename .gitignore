@@ -8,3 +8,6 @@ reports/*.log
 historial.csv
 Reporte*.pdf
 detector_neumonia_orig.py
+.agents/
+.claude/
+skills-lock.json
