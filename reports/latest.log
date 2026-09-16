@@ -133,4 +133,40 @@ test/test_read_img.py::test_read_file_missing_paths[ruta_inventada/sin_extension
 test/test_read_img.py::test_read_jpg_corrupt_or_empty PASSED             [ 99%]
 test/test_read_img.py::test_read_file_directory_path PASSED              [100%]
 
-============================= 126 passed in 27.98s =============================
+=============================== warnings summary ===============================
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: Constant.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: Expr.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: Attribute.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: Call.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: Try.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+test/test_grad_cam.py::test_predict_and_explain_real_samples[dcm_norm]
+  /home/miguel-angel-ortiz/Documentos/Especialización IA/Proyectos_Inteligencia_artificial/UAO-Neumonia/.venv/lib/python3.13/site-packages/gast/astn.py:23: DeprecationWarning: FunctionDef.__init__ got an unexpected keyword argument '___pyct_anno'. Support for arbitrary keyword arguments is deprecated and will be removed in Python 3.15.
+    new_node = cls(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 126 passed, 16 warnings in 25.04s =======================

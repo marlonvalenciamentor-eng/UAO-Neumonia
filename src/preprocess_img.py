@@ -77,7 +77,8 @@ def preprocess_image(array: np.ndarray) -> np.ndarray:
         if max_val > min_val:
             gray = np.uint8(((gray - min_val) / (max_val - min_val)) * 255.0)
         else:
-            gray = np.zeros_like(gray, dtype=np.uint8)
+            fill_val = 255 if max_val > 0 else 0
+            gray = np.full_like(gray, fill_val, dtype=np.uint8)
 
     # 5. Ecualización adaptativa de contraste local (CLAHE)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
