@@ -50,7 +50,7 @@ def test_preprocess_various_input_shapes(input_shape):
 )
 def test_preprocess_supported_dtypes(dtype):
     """Valida que soporte diversos formatos numéricos y siempre retorne float32."""
-    raw_array = (np.ones((256, 256)) * 100).astype(dtype)
+    raw_array = np.random.randint(0, 100, size=(256, 256)).astype(dtype)
     tensor = preprocess_image(raw_array)
 
     assert tensor.dtype == np.float32
@@ -72,11 +72,24 @@ def test_preprocess_supported_dtypes(dtype):
 )
 def test_preprocess_pixel_ranges(fill_value, description):
     """Valida que sin importar la escala de entrada, la salida esté entre [0.0, 1.0]."""
-    array = np.full((300, 300), fill_value, dtype=np.float32)
+    array = np.zeros((300, 300), dtype=np.float32)
+    if fill_value > 0:
+        array[150:, :] = fill_value
     tensor = preprocess_image(array)
 
     assert tensor.min() >= 0.0
     assert tensor.max() <= 1.0
+
+
+def test_constant_image_equivalence():
+    """Valida que imágenes constantes equivalentes en distintos dtypes produzcan el mismo tensor."""
+    img_uint8 = preprocess_image(np.full((256, 256), 128, dtype=np.uint8))
+    img_uint16 = preprocess_image(np.full((256, 256), 32896, dtype=np.uint16))
+    img_float = preprocess_image(np.full((256, 256), 0.5, dtype=np.float32))
+
+    # Verificar que las 3 representaciones de "gris medio" generen tensores equivalentes tras CLAHE
+    np.testing.assert_allclose(img_uint8, img_float, atol=1e-2)
+    np.testing.assert_allclose(img_uint16, img_float, atol=1e-2)
 
 
 # 4. Pruebas de validación de tipos erróneos (5 pruebas)
