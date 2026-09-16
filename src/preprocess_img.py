@@ -72,9 +72,10 @@ def preprocess_image(array: np.ndarray) -> np.ndarray:
 
     # Asegurar que los datos para CLAHE sean enteros de 8 bits (0 - 255)
     if gray.dtype != np.uint8:
+        min_val = gray.min()
         max_val = gray.max()
-        if max_val > 0:
-            gray = np.uint8((gray / max_val) * 255.0)
+        if max_val > min_val:
+            gray = np.uint8(((gray - min_val) / (max_val - min_val)) * 255.0)
         else:
             gray = np.zeros_like(gray, dtype=np.uint8)
 

@@ -18,6 +18,7 @@ import os
 import sys
 import cv2
 import numpy as np
+from typing import Any
 
 # Silenciar mensajes informativos y de advertencia de TensorFlow/CUDA a nivel de C++
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -48,7 +49,7 @@ DIAGNOSTIC_LABELS = {
 
 
 def generate_gradcam_heatmap(
-    model: tf.keras.Model,
+    model: Any,
     batch_tensor: np.ndarray,
     layer_name: str = "conv10_thisone"
 ) -> np.ndarray:
@@ -66,7 +67,8 @@ def generate_gradcam_heatmap(
     """
     # 1. Crear sub-modelo extractor que devuelva la capa convolucional y la predicción final
     last_conv_layer = model.get_layer(layer_name)
-    grad_model = tf.keras.models.Model(
+    import tf_keras
+    grad_model = tf_keras.models.Model(
         inputs=model.inputs,
         outputs=[last_conv_layer.output, model.output]
     )
@@ -143,7 +145,7 @@ def superimpose_heatmap(
 
 def predict_and_explain(
     original_array: np.ndarray,
-    model: tf.keras.Model = None,
+    model: Any = None,
     layer_name: str = "conv10_thisone"
 ) -> tuple[str, float, np.ndarray]:
     """

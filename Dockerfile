@@ -29,8 +29,9 @@ RUN uv sync --frozen --no-install-project --no-cache
 # 7. Copiar el código fuente y demás archivos del proyecto
 COPY . .
 
-# 8. Variable de entorno para que Python reconozca la carpeta src/
+# 8. Variable de entorno para que Python reconozca la carpeta src/ y habilite Keras 2
 ENV PYTHONPATH=/app
+ENV TF_USE_LEGACY_KERAS=1
 
 # 9. Comando por defecto: ejecutar la suite de pruebas unitarias
 CMD ["uv", "run", "pytest", "test/", "-v"]

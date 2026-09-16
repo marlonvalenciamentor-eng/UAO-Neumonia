@@ -6,7 +6,8 @@ import pytest
 import numpy as np
 from PIL import Image
 
-from src.integrator import process_and_diagnose, predict, get_or_load_model
+from src.integrator import process_and_diagnose, predict
+from src.load_model import load_cnn_model
 
 REAL_SAMPLES = [
     "data/DICOM/normal (2).dcm",
@@ -65,9 +66,9 @@ def test_predict_bridge_function(shape):
 
 # 4. Prueba de reutilización y caché del modelo (1 prueba)
 def test_model_caching_singleton():
-    """Valida que get_or_load_model no recargue el archivo del disco repetidamente."""
-    model_a = get_or_load_model()
-    model_b = get_or_load_model()
+    """Valida que load_cnn_model no recargue el archivo del disco repetidamente."""
+    model_a = load_cnn_model()
+    model_b = load_cnn_model()
     assert model_a is model_b, "Debe retornar la misma referencia de modelo"
 
 

@@ -26,6 +26,8 @@ OBJETIVOS ESPECÍFICOS POR FUNCIÓN:
 
 import os
 import sys
+from typing import Any
+from functools import lru_cache
 
 # Silenciar mensajes informativos y de advertencia de TensorFlow/CUDA a nivel de C++
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -38,6 +40,7 @@ os.dup2(_devnull, _stderr_fd)
 os.close(_devnull)
 
 try:
+    os.environ["TF_USE_LEGACY_KERAS"] = "1"
     import tensorflow as tf
 finally:
     os.dup2(_saved_stderr, _stderr_fd)
@@ -45,7 +48,7 @@ finally:
 
 
 
-def validate_model_integrity(model: tf.keras.Model, required_layer: str = "conv10_thisone") -> bool:
+def validate_model_integrity(model: Any, required_layer: str = "conv10_thisone") -> bool:
     """
     Verifica que la red neuronal tenga la estructura esperada por el sistema clínico.
     
@@ -100,7 +103,8 @@ def validate_model_integrity(model: tf.keras.Model, required_layer: str = "conv1
     return True
 
 
-def load_cnn_model(model_path: str = None) -> tf.keras.Model:
+@lru_cache(maxsize=1)
+def load_cnn_model(model_path: str = None) -> Any:
     """
     Carga el modelo convolucional (.h5) desde el disco y certifica su integridad.
     
@@ -137,8 +141,9 @@ def load_cnn_model(model_path: str = None) -> tf.keras.Model:
     if os.path.getsize(model_path) == 0:
         raise ValueError(f"El archivo del modelo '{model_path}' está vacío o corrupto (0 bytes).")
 
-    # 3. Cargar el modelo con Keras sin compilar (evita warnings de optimizadores viejos)
-    model = tf.keras.models.load_model(model_path, compile=False)
+    # 3. Cargar el modelo con tf_keras explícito (evita bugs de lazy loading en pytest con TF > 2.15)
+    import tf_keras
+    model = tf_keras.models.load_model(model_path, compile=False)
 
     # 4. Validar la integridad del modelo
     validate_model_integrity(model)
@@ -147,7 +152,7 @@ def load_cnn_model(model_path: str = None) -> tf.keras.Model:
 
 
 # Función de compatibilidad hacia atrás
-def model_fun() -> tf.keras.Model:
+def model_fun() -> Any:
     """
     Función de conveniencia compatible con el código legacy.
     

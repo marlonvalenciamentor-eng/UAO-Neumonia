@@ -275,7 +275,15 @@ class App:
             # Redimensionar para mostrar en pantalla
             pil_thumb = img2show.resize((260, 260), Image.Resampling.LANCZOS)
             self.img1_tk = ImageTk.PhotoImage(pil_thumb)
-            self.label_img1.configure(image=self.img1_tk, text="")
+            # Limpiar estado anterior para evitar consistencia cruzada (Devin Review)
+            self.result_var.set("")
+            self.proba_var.set("")
+            self.label_img2.configure(image="", text="[ Sin mapa de activación ]\n\nEl análisis Grad-CAM aparecerá tras la predicción")
+            self.img2_tk = None
+            self.heatmap = None
+            self.label = ""
+            self.proba = 0.0
+            
             self.btn_predict["state"] = "normal"
         except Exception as e:
             showerror("Error al cargar imagen", f"No se pudo procesar la radiografía:\n{str(e)}")
@@ -361,9 +369,10 @@ class App:
             report.paste(pil_heat, (540, 180))
             draw.text((540, 615), "Explicabilidad Grad-CAM (Region Pulmonar)", fill=(50, 50, 50), font=font_labels)
 
-        pdf_path = f"Reporte_{self.report_id}.pdf"
+        # Generar nombre único usando timestamp para evitar sobrescritura (Devin Review)
+        timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        pdf_path = f"Reporte_{patient_id}_{timestamp_str}.pdf"
         report.save(pdf_path)
-        self.report_id += 1
         showinfo(title="PDF Generado", message=f"Reporte clínico generado con éxito:\n{pdf_path}")
 
     def reset_form(self):
