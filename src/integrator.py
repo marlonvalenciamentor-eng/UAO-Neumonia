@@ -24,6 +24,7 @@ import sys
 import argparse
 import numpy as np
 from PIL import Image
+from typing import Any
 
 from src.read_img import read_file
 from src.load_model import load_cnn_model
@@ -33,10 +34,14 @@ from src.grad_cam import predict_and_explain
 _CACHED_MODEL = None
 
 
-def get_or_load_model():
+def get_or_load_model() -> Any:
     """
     Retorna el modelo en memoria. Si aún no está cargado, lo carga y lo almacena en caché.
     Evita recargar 113 MB de disco en cada predicción.
+    
+    Returns:
+        Any: El modelo tf.keras.Model cargado desde el almacenamiento persistente
+             o directamente desde la caché si ya había sido inicializado.
     """
     global _CACHED_MODEL
     if _CACHED_MODEL is None:
@@ -44,22 +49,28 @@ def get_or_load_model():
     return _CACHED_MODEL
 
 
-def process_and_diagnose(input_data, model=None) -> dict:
+def process_and_diagnose(input_data: str | np.ndarray, model: Any = None) -> dict:
     """
-    Función principal de integración:
+    Función principal de integración y orquestación (Patrón Fachada).
     
-    Acepta:
-        - input_data: Ruta a un archivo (.dcm, .jpg, .png) O un arreglo NumPy en memoria.
-        - model: Modelo pre-cargado (opcional).
+    Coordina el flujo completo: validación de lectura, carga de modelo (si no se provee),
+    preprocesamiento, inferencia de predicciones y generación de mapas de calor.
+    
+    Args:
+        input_data (str | np.ndarray): Ruta a un archivo (.dcm, .jpg, .png) O un arreglo NumPy en memoria.
+        model (Any, optional): Modelo de Keras pre-cargado. Si es None, intentará
+                               obtenerlo de la caché local o cargarlo del disco.
         
-    Retorna un diccionario clínico unificado:
-        {
-            "label": str,              # 'bacteriana', 'normal', 'viral'
-            "probability": float,      # Porcentaje (0.0 a 100.0)
-            "heatmap": np.ndarray,     # Imagen con Grad-CAM superpuesto (512x512x3, uint8)
-            "original_array": np.ndarray, # Matriz original
-            "display_image": Image.Image  # Objeto PIL para mostrar en Tkinter/Streamlit
-        }
+    Returns:
+        dict: Un diccionario estructurado con los resultados clínicos:
+            - 'label' (str): Clasificación ('bacteriana', 'normal', 'viral').
+            - 'probability' (float): Porcentaje de confianza (0.0 a 100.0).
+            - 'heatmap' (np.ndarray): Imagen con Grad-CAM superpuesto (RGB, uint8).
+            - 'original_array' (np.ndarray): Matriz numérica original.
+            - 'display_image' (Image.Image): Objeto PIL renderizable en GUIs.
+            
+    Raises:
+        TypeError: Si input_data no es del tipo soportado (str o np.ndarray).
     """
     # 1. Resolver el modelo (usar el suministrado o el de caché)
     active_model = model if model is not None else get_or_load_model()
@@ -94,19 +105,32 @@ def process_and_diagnose(input_data, model=None) -> dict:
 
 
 # Función compatible con la firma que usaba el detector_neumonia.py original
-def predict(array: np.ndarray):
+def predict(array: np.ndarray) -> tuple[str, float, np.ndarray]:
     """
-    Función puente compatible con la interfaz gráfica original.
-    Retorna la tupla clásica: (label, proba, heatmap)
+    Función puente compatible con la interfaz gráfica original y CLI antiguo.
+    
+    Args:
+        array (np.ndarray): La matriz numérica de la imagen.
+        
+    Returns:
+        tuple[str, float, np.ndarray]: Una tupla que contiene:
+            - str: El diagnóstico (label).
+            - float: La probabilidad de confianza.
+            - np.ndarray: El mapa de calor Grad-CAM superpuesto.
     """
     results = process_and_diagnose(array)
     return results["label"], results["probability"], results["heatmap"]
 
 
-def main_cli():
+def main_cli() -> None:
     """
-    Punto de entrada para ejecutar el sistema por consola (CLI),
-    cumpliendo con el requisito de la guía: 'salidas para interfaz gráfica / CLI'.
+    Punto de entrada para ejecutar el sistema por consola (CLI).
+    
+    Cumple con el requisito de la guía: 'salidas para interfaz gráfica / CLI'.
+    Analiza una imagen pasada por argumentos de consola e imprime el reporte.
+    
+    Returns:
+        None
     """
     parser = argparse.ArgumentParser(
         description="Sistema de Detección de Neumonía y Explicabilidad (CLI)"

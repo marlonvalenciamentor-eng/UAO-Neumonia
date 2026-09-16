@@ -55,8 +55,14 @@ def generate_gradcam_heatmap(
     """
     Calcula el mapa de activación de clase ponderado por gradientes (Grad-CAM).
     
-    Retorna:
-        np.ndarray: Matriz 2D de intensidades (512x512) normalizada entre 0.0 y 1.0.
+    Args:
+        model (tf.keras.Model): Modelo de Keras cargado y validado.
+        batch_tensor (np.ndarray): Tensor de entrada preprocesado de forma (1, 512, 512, 1).
+        layer_name (str, optional): Nombre de la capa convolucional de la cual extraer 
+                                    los mapas de activación. Por defecto es "conv10_thisone".
+                                    
+    Returns:
+        np.ndarray: Matriz 2D de intensidades espaciales (512x512) normalizada entre 0.0 y 1.0.
     """
     # 1. Crear sub-modelo extractor que devuelva la capa convolucional y la predicción final
     last_conv_layer = model.get_layer(layer_name)
@@ -108,7 +114,12 @@ def superimpose_heatmap(
     """
     Superpone el mapa de calor con mapa de color JET sobre la imagen original.
     
-    Retorna:
+    Args:
+        original_array (np.ndarray): Matriz numérica de la imagen radiográfica original.
+        heatmap (np.ndarray): Mapa de calor Grad-CAM 2D normalizado [0.0, 1.0].
+        alpha (float, optional): Opacidad del mapa de calor superpuesto. Por defecto 0.8.
+        
+    Returns:
         np.ndarray: Imagen RGB (uint8) de 512x512 con el mapa de calor visualizable.
     """
     # Convertir el mapa de calor a formato de color JET (8 bits)
@@ -136,10 +147,18 @@ def predict_and_explain(
     layer_name: str = "conv10_thisone"
 ) -> tuple[str, float, np.ndarray]:
     """
-    Función principal del módulo: Realiza la clasificación clínica y Grad-CAM.
+    Función principal del módulo: Realiza la clasificación clínica y genera explicabilidad Grad-CAM.
     
-    Retorna:
-        tuple[str, float, np.ndarray]: (clase_predicha, probabilidad_porcentaje, imagen_heatmap)
+    Args:
+        original_array (np.ndarray): Matriz numérica de la imagen radiográfica original.
+        model (tf.keras.Model, optional): Modelo pre-cargado. Si es None, se cargará desde el disco.
+        layer_name (str, optional): Nombre de la capa convolucional para Grad-CAM.
+        
+    Returns:
+        tuple[str, float, np.ndarray]: Una tupla con:
+            - str: Clase médica predicha ('bacteriana', 'normal', 'viral').
+            - float: Probabilidad de certeza (0.0% a 100.0%).
+            - np.ndarray: Imagen con el mapa de calor Grad-CAM superpuesto.
     """
     # 1. Cargar modelo si no fue suministrado
     if model is None:
@@ -166,6 +185,14 @@ def predict_and_explain(
 
 # Compatibilidad hacia atrás con el código legacy
 def grad_cam(array: np.ndarray) -> np.ndarray:
-    """Función legacy: retorna directamente la imagen superpuesta."""
+    """
+    Función legacy compatible: retorna directamente la imagen superpuesta.
+    
+    Args:
+        array (np.ndarray): Matriz numérica de la radiografía original.
+        
+    Returns:
+        np.ndarray: La imagen RGB (uint8) procesada con el mapa de calor superpuesto.
+    """
     _, _, superimposed_img = predict_and_explain(array)
     return superimposed_img

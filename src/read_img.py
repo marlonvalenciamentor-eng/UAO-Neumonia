@@ -54,9 +54,20 @@ import pydicom as dicom
 from PIL import Image
 
 
-def read_dicom_file(path: str):
+def read_dicom_file(path: str) -> tuple[np.ndarray, Image.Image]:
     """
     Lee un archivo en formato estándar de radiología médica (.dcm).
+    
+    Args:
+        path (str): Ruta absoluta o relativa al archivo DICOM.
+        
+    Returns:
+        tuple[np.ndarray, Image.Image]: Una tupla que contiene:
+            - np.ndarray: Matriz de imagen RGB en formato NumPy (para cálculos).
+            - Image.Image: Objeto de imagen PIL (para renderizado en UI).
+            
+    Raises:
+        FileNotFoundError: Si el archivo especificado no existe en la ruta.
     """
     # 1. Validación de seguridad: Verificar que el archivo realmente existe en el disco
     if not os.path.exists(path):
@@ -96,9 +107,21 @@ def read_dicom_file(path: str):
     return img_rgb, img2show
 
 
-def read_jpg_file(path: str):
+def read_jpg_file(path: str) -> tuple[np.ndarray, Image.Image]:
     """
     Lee una imagen fotográfica estándar (.jpg, .jpeg, .png).
+    
+    Args:
+        path (str): Ruta absoluta o relativa al archivo de imagen.
+        
+    Returns:
+        tuple[np.ndarray, Image.Image]: Una tupla que contiene:
+            - np.ndarray: Matriz de imagen RGB en formato NumPy (para cálculos).
+            - Image.Image: Objeto de imagen PIL (para renderizado en UI).
+            
+    Raises:
+        FileNotFoundError: Si el archivo especificado no existe en la ruta.
+        ValueError: Si el archivo está dañado o no puede ser decodificado por OpenCV.
     """
     # 1. Validación de existencia
     if not os.path.exists(path):
@@ -118,10 +141,23 @@ def read_jpg_file(path: str):
     return img_rgb, img2show
 
 
-def read_file(path: str):
+def read_file(path: str) -> tuple[np.ndarray, Image.Image]:
     """
-    Función orquestadora inteligente:
-    Detecta automáticamente la extensión del archivo y llama a la función correspondiente.
+    Función orquestadora inteligente para lectura de imágenes médicas.
+    
+    Detecta automáticamente la extensión del archivo y delega la lectura
+    a la función especializada correspondiente. Proporciona tolerancia a fallos
+    para archivos médicos que carecen de extensión explícita.
+    
+    Args:
+        path (str): Ruta absoluta o relativa al archivo a leer.
+        
+    Returns:
+        tuple[np.ndarray, Image.Image]: Una tupla con la matriz NumPy y el objeto PIL.
+        
+    Raises:
+        FileNotFoundError: Si el archivo especificado no existe en la ruta.
+        ValueError: Si el archivo es inválido o no soportado.
     """
     # Obtiene la extensión del archivo en minúsculas (por ejemplo: '.dcm' o '.jpg')
     extension = os.path.splitext(path)[1].lower()

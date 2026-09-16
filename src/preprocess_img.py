@@ -29,11 +29,20 @@ def preprocess_image(array: np.ndarray) -> np.ndarray:
     """
     Preprocesa una imagen radiográfica (NumPy array) para la entrada de la CNN.
     
-    Parámetros:
-        array (np.ndarray): Matriz numérica de la imagen original.
+    Aplica redimensionamiento espacial a 512x512, conversión a escala de grises,
+    ecualización adaptativa de contraste local (CLAHE), normalización al rango [0.0, 1.0]
+    y expansión de dimensiones a formato de batch de Keras/TensorFlow.
+    
+    Args:
+        array (np.ndarray): Matriz numérica de la imagen original a preprocesar.
         
-    Retorna:
-        np.ndarray: Tensor 4D de forma (1, 512, 512, 1) normalizado entre 0.0 y 1.0.
+    Returns:
+        np.ndarray: Tensor 4D de coma flotante de forma (1, 512, 512, 1) normalizado entre 0.0 y 1.0.
+        
+    Raises:
+        TypeError: Si el parámetro 'array' no es una instancia de np.ndarray.
+        ValueError: Si el arreglo está vacío, no tiene dimensiones válidas, 
+                    o tiene un número de canales no soportado.
     """
     # 1. Validación de tipo de dato
     if not isinstance(array, np.ndarray):
