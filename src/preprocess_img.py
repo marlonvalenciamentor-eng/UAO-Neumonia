@@ -72,11 +72,17 @@ def preprocess_image(array: np.ndarray) -> np.ndarray:
 
     # Asegurar que los datos para CLAHE sean enteros de 8 bits (0 - 255)
     if gray.dtype != np.uint8:
+        min_val = gray.min()
         max_val = gray.max()
-        if max_val > 0:
-            gray = np.uint8((gray / max_val) * 255.0)
+        if max_val > min_val:
+            gray = np.uint8(((gray - min_val) / (max_val - min_val)) * 255.0)
         else:
-            gray = np.zeros_like(gray, dtype=np.uint8)
+            if gray.dtype == np.uint16:
+                gray = np.uint8((gray / 65535.0) * 255.0)
+            elif gray.dtype in (np.float32, np.float64) and 0.0 <= max_val <= 1.0:
+                gray = np.uint8(gray * 255.0)
+            else:
+                raise ValueError("La imagen carece de contraste y está fuera de rangos fiables. No es posible normalizarla de forma segura.")
 
     # 5. Ecualización adaptativa de contraste local (CLAHE)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))

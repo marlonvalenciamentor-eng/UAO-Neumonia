@@ -75,8 +75,8 @@ UAO-Neumonia/
 │   ├── load_model.py         # Módulo 3: Carga con caché y validación del modelo
 │   ├── preprocess_img.py     # Módulo 2: Preprocesamiento espacial y CLAHE
 │   └── read_img.py           # Módulo 1: Lectura universal de imágenes
-└── test/                     # Suite de Aseguramiento de Calidad (121 Pruebas)
-    ├── test_detector_neumonia.py (20 tests: ciclo de vida GUI, CSV y reportes PDF)
+└── test/                     # Suite de Aseguramiento de Calidad (126 Pruebas)
+    ├── test_detector_neumonia.py (25 tests: ciclo de vida GUI, CSV y reportes PDF)
     ├── test_grad_cam.py          (15 tests: inferencia y mapas de calor JET)
     ├── test_integrator.py        (20 tests: pipeline E2E y caché Singleton)
     ├── test_load_model.py        (15 tests: arquitectura e integridad de la CNN)
@@ -91,6 +91,9 @@ UAO-Neumonia/
 ## Arquitectura
 
 Cada módulo tiene una responsabilidad única y no conoce los detalles internos de los demás. La interfaz gráfica (`detector_neumonia.py`) actúa únicamente como vista y no tiene ninguna dependencia directa de TensorFlow ni de OpenCV:
+
+> **[🚀 Clic aquí para ver el Diagrama de Arquitectura Interactivo de Archify](./arquitectura_neumonia.html)**  
+> *(Nota: GitHub no renderiza HTML por seguridad. Descarga o clona el repositorio y abre este archivo HTML localmente en tu navegador Chrome/Edge).*
 
 ```mermaid
 flowchart TD
@@ -133,7 +136,7 @@ sequenceDiagram
     UI->>Orquestador: predict(array_rgb)
     Orquestador->>Preproc: preprocess_image(array_rgb)
     Preproc-->>Orquestador: Tensor normalizado (1, 512, 512, 1)
-    Orquestador->>Modelo: get_or_load_model()
+    Orquestador->>Modelo: load_cnn_model()
     Modelo-->>Orquestador: Instancia tf.keras.Model (Caché RAM)
     Orquestador->>GradCAM: predict_and_explain(tensor, modelo)
     GradCAM->>GradCAM: GradientTape (Cálculo de gradientes y Heatmap)
@@ -296,9 +299,10 @@ Este proyecto está licenciado bajo los términos de la Licencia MIT. Consulte e
 
 ---
 
-## Autor
+## Autores
 
 - **Miguel Ángel Ortiz** — [@miguelortizR](https://github.com/miguelortizR)
+- **Marlon Valencia (Mentor)** — [@marlonvalenciamentor-eng](https://github.com/marlonvalenciamentor-eng)
 
 *Proyecto desarrollado para el curso **Desarrollo de Proyectos de Inteligencia Artificial**, Especialización en Inteligencia Artificial, Universidad Autónoma de Occidente (UAO).*  
 *Repositorio Base de Referencia: [dalquinones/UAO-Neumonia](https://github.com/dalquinones/UAO-Neumonia)*

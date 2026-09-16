@@ -1,5 +1,6 @@
 .PHONY: help run test test-all test-read test-preprocess test-model test-gradcam test-integrator test-gui commit clean
 SHELL := /bin/bash
+.SHELLFLAGS := -eu -o pipefail -c
 export PATH := $(HOME)/.local/bin:$(PATH)
 TIMESTAMP := $(shell date +"%Y-%m-%d_%H-%M-%S")
 

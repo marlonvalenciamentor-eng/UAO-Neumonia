@@ -13,12 +13,12 @@ RESPONSABILIDAD ÚNICA:
 =============================================================================
 """
 
+import os
 import csv
-import cv2
 import datetime
-import csv
+import uuid
+import numpy as np
 import cv2
-import datetime
 from tkinter import Tk, StringVar, END
 from tkinter import ttk, filedialog
 from tkinter.messagebox import askokcancel, showinfo, showerror, showwarning
@@ -229,10 +229,10 @@ class App:
         self.btn_predict = ttk.Button(actions_frame, text="⚡ Predecir", style="Primary.TButton", state="disabled", command=self.run_prediction)
         self.btn_predict.grid(row=0, column=1, padx=4, sticky="ew")
 
-        self.btn_save = ttk.Button(actions_frame, text="💾 Guardar CSV", style="Secondary.TButton", command=self.save_csv)
+        self.btn_save = ttk.Button(actions_frame, text="💾 Guardar CSV", style="Secondary.TButton", state="disabled", command=self.save_csv)
         self.btn_save.grid(row=0, column=2, padx=4, sticky="ew")
 
-        self.btn_pdf = ttk.Button(actions_frame, text="📄 Generar PDF", style="Secondary.TButton", command=self.create_pdf)
+        self.btn_pdf = ttk.Button(actions_frame, text="📄 Generar PDF", style="Secondary.TButton", state="disabled", command=self.create_pdf)
         self.btn_pdf.grid(row=0, column=3, padx=4, sticky="ew")
 
         self.btn_delete = ttk.Button(actions_frame, text="🗑️ Borrar", style="Danger.TButton", command=self.reset_form)
@@ -275,8 +275,19 @@ class App:
             # Redimensionar para mostrar en pantalla
             pil_thumb = img2show.resize((260, 260), Image.Resampling.LANCZOS)
             self.img1_tk = ImageTk.PhotoImage(pil_thumb)
+            # Limpiar estado anterior para evitar consistencia cruzada (Devin Review)
+            self.result_var.set("")
+            self.proba_var.set("")
             self.label_img1.configure(image=self.img1_tk, text="")
+            self.label_img2.configure(image="", text="[ Sin mapa de activación ]\n\nEl análisis Grad-CAM aparecerá tras la predicción")
+            self.img2_tk = None
+            self.heatmap = None
+            self.label = ""
+            self.proba = 0.0
+            
             self.btn_predict["state"] = "normal"
+            self.btn_save["state"] = "disabled"
+            self.btn_pdf["state"] = "disabled"
         except Exception as e:
             showerror("Error al cargar imagen", f"No se pudo procesar la radiografía:\n{str(e)}")
 
@@ -302,6 +313,8 @@ class App:
             # Mostrar valores diagnósticos en variables reactivas
             self.result_var.set(self.label.upper())
             self.proba_var.set(f"{self.proba:.2f}%")
+            self.btn_save["state"] = "normal"
+            self.btn_pdf["state"] = "normal"
 
         except Exception as e:
             showerror("Error de Inferencia", f"Ocurrió una falla durante el análisis Grad-CAM:\n{str(e)}")
@@ -322,6 +335,10 @@ class App:
 
     def create_pdf(self):
         """Genera un reporte médico clínico en formato PDF de forma nativa e independiente del SO."""
+        if not self.label:
+            showwarning("Atención", "No hay un diagnóstico válido para exportar. Realice una predicción primero.")
+            return
+
         w, h = 1024, 768
         report = Image.new("RGB", (w, h), color=(255, 255, 255))
         draw = ImageDraw.Draw(report)
@@ -361,9 +378,12 @@ class App:
             report.paste(pil_heat, (540, 180))
             draw.text((540, 615), "Explicabilidad Grad-CAM (Region Pulmonar)", fill=(50, 50, 50), font=font_labels)
 
-        pdf_path = f"Reporte_{self.report_id}.pdf"
+        # Generar nombre único usando timestamp
+        patient_id = self.patient_id_var.get().strip() or "S_N"
+        timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        unique_suffix = str(uuid.uuid4())[:6]
+        pdf_path = f"Reporte_{patient_id}_{timestamp_str}_{unique_suffix}.pdf"
         report.save(pdf_path)
-        self.report_id += 1
         showinfo(title="PDF Generado", message=f"Reporte clínico generado con éxito:\n{pdf_path}")
 
     def reset_form(self):
@@ -381,6 +401,8 @@ class App:
             self.label = ""
             self.proba = 0.0
             self.btn_predict["state"] = "disabled"
+            self.btn_save["state"] = "disabled"
+            self.btn_pdf["state"] = "disabled"
 
 
 def main():

@@ -30,23 +30,7 @@ from src.read_img import read_file
 from src.load_model import load_cnn_model
 from src.grad_cam import predict_and_explain
 
-# Variable global a nivel de módulo para mantener el modelo en memoria (Singleton / Caché)
-_CACHED_MODEL = None
-
-
-def get_or_load_model() -> Any:
-    """
-    Retorna el modelo en memoria. Si aún no está cargado, lo carga y lo almacena en caché.
-    Evita recargar 113 MB de disco en cada predicción.
-    
-    Returns:
-        Any: El modelo tf.keras.Model cargado desde el almacenamiento persistente
-             o directamente desde la caché si ya había sido inicializado.
-    """
-    global _CACHED_MODEL
-    if _CACHED_MODEL is None:
-        _CACHED_MODEL = load_cnn_model()
-    return _CACHED_MODEL
+# La caché ahora es administrada internamente por load_cnn_model (lru_cache)
 
 
 def process_and_diagnose(input_data: str | np.ndarray, model: Any = None) -> dict:
@@ -72,10 +56,7 @@ def process_and_diagnose(input_data: str | np.ndarray, model: Any = None) -> dic
     Raises:
         TypeError: Si input_data no es del tipo soportado (str o np.ndarray).
     """
-    # 1. Resolver el modelo (usar el suministrado o el de caché)
-    active_model = model if model is not None else get_or_load_model()
-
-    # 2. Paso de lectura según el tipo de entrada recibida
+    # 1. Paso de lectura y validación de entrada
     if isinstance(input_data, str):
         original_array, display_image = read_file(input_data)
     elif isinstance(input_data, np.ndarray):
@@ -90,6 +71,9 @@ def process_and_diagnose(input_data: str | np.ndarray, model: Any = None) -> dic
             f"Tipo de entrada no soportado: {type(input_data)}. "
             "Se esperaba una ruta (str) o una matriz NumPy (np.ndarray)."
         )
+
+    # 2. Resolver el modelo (usar el suministrado o el de caché)
+    active_model = model if model is not None else load_cnn_model()
 
     # 3. Ejecutar predicción y explicabilidad Grad-CAM
     label, proba, heatmap = predict_and_explain(original_array, model=active_model)

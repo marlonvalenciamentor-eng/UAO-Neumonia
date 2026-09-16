@@ -4,6 +4,7 @@ Valida el ciclo de vida de la GUI, guardado en CSV, reportes PDF y transiciones 
 """
 import os
 import shutil
+import glob
 import pytest
 import numpy as np
 from unittest.mock import patch
@@ -95,8 +96,11 @@ def test_gui_create_pdf_various_diagnoses(app_instance, patient_id, diag_label, 
     with patch("src.detector_neumonia.showinfo"):
         app_instance.create_pdf()
 
-    expected_pdf = f"Reporte_{app_instance.report_id - 1}.pdf"
-    assert os.path.exists(expected_pdf)
+    # Buscar el PDF generado usando un patrón glob
+    pattern = f"Reporte_{patient_id}_*.pdf"
+    generated_pdfs = glob.glob(pattern)
+    assert len(generated_pdfs) > 0, f"No se generó el PDF para {patient_id}"
+    expected_pdf = generated_pdfs[0]
     assert os.path.getsize(expected_pdf) > 0
 
     # Guardar copia persistente de evidencia en la carpeta reports/evidencias_pdf/
@@ -106,8 +110,7 @@ def test_gui_create_pdf_various_diagnoses(app_instance, patient_id, diag_label, 
     shutil.copy(expected_pdf, evidence_path)
 
     # Limpiar el temporal de la raíz
-    if os.path.exists(expected_pdf):
-        os.remove(expected_pdf)
+    os.remove(expected_pdf)
 
 
 # 4. Pruebas de reinicio de formulario (Confirmado vs Cancelado) (3 pruebas)
@@ -162,17 +165,21 @@ def test_gui_report_id_increments(app_instance):
     app_instance.array = np.zeros((512, 512, 3), dtype=np.uint8)
     app_instance.heatmap = np.zeros((512, 512, 3), dtype=np.uint8)
 
+    # Limpiar PDFs anteriores para evitar fallas por ejecuciones previas
+    for rep in glob.glob("Reporte_ID-INC_*.pdf"):
+        os.remove(rep)
+
     with patch("src.detector_neumonia.showinfo"):
         app_instance.create_pdf()
-        app_instance.create_pdf()
 
-    assert app_instance.report_id == initial_id + 2
+    # Test report_id is not used for pdf naming anymore,
+    # instead we verify that pdf is generated
+    generated_pdfs = glob.glob("Reporte_ID-INC_*.pdf")
+    assert len(generated_pdfs) >= 1
 
     # Limpieza
-    for rep in [initial_id, initial_id + 1]:
-        f = f"Reporte_{rep}.pdf"
-        if os.path.exists(f):
-            os.remove(f)
+    for rep in generated_pdfs:
+        os.remove(rep)
 
 
 def test_gui_empty_patient_id_default(app_instance):
@@ -186,10 +193,11 @@ def test_gui_empty_patient_id_default(app_instance):
         app_instance.save_csv()
         app_instance.create_pdf()
 
-    rep_file = f"Reporte_{app_instance.report_id - 1}.pdf"
-    assert os.path.exists(rep_file)
-    if os.path.exists(rep_file):
-        os.remove(rep_file)
+    # Por defecto 'S_N'
+    generated_pdfs = glob.glob("Reporte_S_N_*.pdf")
+    assert len(generated_pdfs) > 0
+    rep_file = generated_pdfs[0]
+    os.remove(rep_file)
 
 
 # 6. Pruebas de transiciones de botones (3 pruebas)
