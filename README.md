@@ -296,9 +296,10 @@ Este proyecto está licenciado bajo los términos de la Licencia MIT. Consulte e
 
 ---
 
-## Autor
+## Autores
 
 - **Miguel Ángel Ortiz** — [@miguelortizR](https://github.com/miguelortizR)
+- **Marlon Valencia (Mentor)** — [@marlonvalenciamentor-eng](https://github.com/marlonvalenciamentor-eng)
 
 *Proyecto desarrollado para el curso **Desarrollo de Proyectos de Inteligencia Artificial**, Especialización en Inteligencia Artificial, Universidad Autónoma de Occidente (UAO).*  
 *Repositorio Base de Referencia: [dalquinones/UAO-Neumonia](https://github.com/dalquinones/UAO-Neumonia)*
