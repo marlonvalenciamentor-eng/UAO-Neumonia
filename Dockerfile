@@ -1,21 +1,36 @@
+# ==============================================================================
+# Dockerfile Oficial - UAO-Neumonia
+# Entorno reproducible basado en Python 3.13 + UV + OpenCV
+# ==============================================================================
+
+# 1. Imagen base oficial ligera de Python 3.13
 FROM python:3.13-slim
 
-# Dependencias del sistema: OpenCV y Tkinter necesitan estas librerias
+# 2. Copiar el binario oficial de UV (sin instalar nada de PIP)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# 3. Instalar dependencias del sistema operativo (OpenCV, Tkinter, Make)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    make \
     libgl1 \
     libglib2.0-0 \
-    tk \
+    python3-tk \
     && rm -rf /var/lib/apt/lists/*
 
+# 4. Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Se copian primero las dependencias para aprovechar la cache de capas
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 5. Copiar primero la definición de dependencias para aprovechar el caché de Docker
+COPY pyproject.toml uv.lock ./
 
+# 6. Sincronizar el entorno virtual con UV de forma determinista
+RUN uv sync --frozen --no-install-project --no-cache
+
+# 7. Copiar el código fuente y demás archivos del proyecto
 COPY . .
 
-ENV TF_USE_LEGACY_KERAS=1
-ENV TF_CPP_MIN_LOG_LEVEL=2
+# 8. Variable de entorno para que Python reconozca la carpeta src/
+ENV PYTHONPATH=/app
 
-ENTRYPOINT ["python", "detector_neumonia.py"]
+# 9. Comando por defecto: ejecutar la suite de pruebas unitarias
+CMD ["uv", "run", "pytest", "test/", "-v"]

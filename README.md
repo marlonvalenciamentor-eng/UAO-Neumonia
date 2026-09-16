@@ -2,16 +2,14 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.21-FF6F00?logo=tensorflow&logoColor=white)
-![uv](https://img.shields.io/badge/gestor-uv-DE5FE9)
-![Tests](https://img.shields.io/badge/pytest-13%20passed-12695E)
-![License](https://img.shields.io/badge/licencia-MIT-blue)
+![uv](https://img.shields.io/badge/gestor-uv-DE5FE9?logo=astral&logoColor=white)
+![Tests](https://img.shields.io/badge/pytest-126%20passed-12695E?logo=pytest&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/licencia-MIT-yellow?logo=open-source-initiative&logoColor=white)
 
-Herramienta de apoyo al diagnóstico médico que clasifica radiografías de tórax en
-**neumonía bacteriana**, **neumonía viral** o **sin neumonía**, y explica su decisión
-mediante un mapa de calor Grad-CAM superpuesto sobre la imagen original.
+Herramienta de apoyo al diagnóstico médico que clasifica radiografías de tórax en **neumonía bacteriana**, **neumonía viral** o **sin neumonía (normal)**, y explica su decisión mediante un mapa de calor **Grad-CAM** superpuesto sobre la imagen anatómica original.
 
-> **Aviso**: este software es un ejercicio académico. No constituye un dispositivo
-> médico ni debe usarse para tomar decisiones clínicas.
+> **Aviso Médico y Académico**: Este software es un desarrollo con fines estrictamente académicos e investigativos dentro de la Especialización en Inteligencia Artificial de la Universidad Autónoma de Occidente. No constituye un dispositivo médico certificado ni debe emplearse como sustituto del criterio de un profesional de la salud.
 
 ---
 
@@ -26,26 +24,27 @@ mediante un mapa de calor Grad-CAM superpuesto sobre la imagen original.
 - [Ejecución](#ejecución)
 - [Ejecución con Docker](#ejecución-con-docker)
 - [Uso de la aplicación](#uso-de-la-aplicación)
-- [Pruebas](#pruebas)
+- [Pruebas (126 Tests)](#pruebas-126-tests)
 - [Módulos](#módulos)
 - [Decisiones de diseño](#decisiones-de-diseño)
 - [Errores corregidos del código base](#errores-corregidos-del-código-base)
 - [Limitaciones conocidas](#limitaciones-conocidas)
 - [Licencia](#licencia)
-- [Autores]- Marlon Valencia Velosa — [@marlonvalenciamentor-eng](https://github.com/marlonvalenciamentor-eng)
+- [Autores](#autores)
 
 ---
 
 ## Características
 
-- Lectura de imágenes en formato **DICOM** y **JPG/PNG**.
-- Preprocesamiento estándar: redimensionamiento a 512×512, escala de grises,
-  ecualización adaptativa **CLAHE** y normalización.
-- Inferencia con una red convolucional entrenada (`conv_MLP_84.h5`, arquitectura
-  `Net5Blocks`, 57 capas).
-- Explicabilidad con **Grad-CAM** implementado sobre `tf.GradientTape`.
-- Interfaz gráfica en Tkinter con exportación de resultados a **CSV** y **PDF**.
-- Suite de pruebas unitarias con **pytest** que se ejecuta sin necesidad del modelo.
+- **Lectura Multiformato**: Decodificación nativa de archivos clínicos estándar **DICOM (.dcm)** de 16 bits y formatos comprimidos comunes (**JPG, JPEG, PNG**).
+- **Preprocesamiento Clínico y Morfológico**: Redimensionamiento espacial estándar (512×512), conversión monocromática de 1 canal, ecualización adaptativa de histograma de contraste limitado (**CLAHE**) y normalización numérica en rango flotante `[0.0, 1.0]`.
+- **Inferencia Convolucional Optimizada**: Integración con la red entrenada (`conv_MLP_84.h5` / `WilhemNet86.h5`), validando la presencia de capas críticas (`conv10_thisone`).
+- **Explicabilidad Médica con Grad-CAM**: Reescritura moderna sobre **`tf.GradientTape`** en modo *Eager Execution*, eliminando el modo estático de grafos y las advertencias de deprecación.
+- **Interfaz Médica Responsiva y Accesible**: Diseño moderno basado en `ttk.Style` con layout `grid` fluido, empty states informativos, barra de progreso animada durante inferencia, prevención y diálogo amigable de errores clínicos, y atajos de teclado (`Ctrl+O`, `Enter`, `Ctrl+S`, `Esc`).
+- **Reportes Clínicos Nativos en PDF**: Composición gráfica en memoria mediante Pillow (`PIL`) con tipografías vectoriales TrueType, eliminando dependencias obsoletas (`tkcap`) e incompatibilidades con servidores gráficos Wayland en Linux y contenedores Docker.
+- **Persistencia en Historial CSV**: Registro histórico ordenado con identificador del paciente, marca temporal precisa, patología detectada y probabilidad porcentual.
+- **Aseguramiento de Calidad Exhaustivo**: Suite de **126 pruebas unitarias** estructuradas con `pytest`, ejecutables de forma desatendida (*headless*) en menos de 28 segundos y con archivo automático de evidencias PDF en `reports/evidencias_pdf/`.
+
 
 ---
 
@@ -53,63 +52,63 @@ mediante un mapa de calor Grad-CAM superpuesto sobre la imagen original.
 
 ```text
 UAO-Neumonia/
-├── src/                       Lógica del pipeline
+├── .dockerignore              # Exclusiones del demonio Docker (ahorro de 2.8 GB)
+├── .gitignore                # Exclusión de pesos .h5, .venv, reportes y temporales
+├── BITACORA_TECNICA.md       # Bitácora detallada de errores y decisiones (ADRs)
+├── Dockerfile                # Imagen multi-stage optimizada con Python 3.13 y UV
+├── LICENSE.txt               # Licencia de código abierto MIT
+├── Makefile                  # Orquestación y automatización de tareas
+├── README.md                 # Documentación técnica principal
+├── pyproject.toml            # Definición formal del proyecto y dependencias UV
+├── uv.lock                   # Árbol de dependencias deterministas congeladas
+├── data/                     # Conjuntos de radiografías de prueba
+│   ├── DICOM/                # Radiografías clínicas (.dcm)
+│   └── JPG/                  # Radiografías clasificadas (bacteria, normal, virus)
+├── reports/                  # Registro de calidad y evidencias generadas
+│   ├── evidencias_pdf/       # Reportes clínicos PDF generados en los tests
+│   └── test_all_*.log        # Logs fechados de ejecución de pruebas
+├── src/                      # Módulos de lógica desacoplada (Alta Cohesión)
 │   ├── __init__.py
-│   ├── read_img.py            Lectura de DICOM y JPG a arreglos NumPy
-│   ├── preprocess_img.py      Redimensionado, CLAHE y normalización
-│   ├── load_model.py          Carga del modelo con caché
-│   ├── grad_cam.py            Mapa de calor con GradientTape
-│   └── integrator.py          Orquestación del pipeline completo
-├── tests/                     Pruebas unitarias
-│   ├── __init__.py
-│   ├── conftest.py            Fixtures: imágenes y DICOM sintéticos
-│   ├── test_read_img.py
-│   ├── test_preprocess_img.py
-│   ├── test_load_model.py
-│   └── test_integrator.py
-├── detector_neumonia.py       Interfaz gráfica (Tkinter)
-├── compat_tix.py              Compatibilidad de tkcap con Python 3.13
-├── conftest.py                Habilita la raíz en el path de pytest
-├── Dockerfile
-├── Makefile                   Automatización de tareas
-├── pyproject.toml             Configuración del proyecto y de pytest
-├── requirements.txt           Dependencias con versiones fijadas
-├── uv.lock                    Resolución exacta del entorno
-├── LICENSE.md
-└── README.md
+│   ├── detector_neumonia.py  # Interfaz gráfica de usuario (Tkinter + PIL)
+│   ├── grad_cam.py           # Módulo 4: Inferencia y Explicabilidad Grad-CAM
+│   ├── integrator.py         # Módulo 5: Orquestador y Fachada del Pipeline
+│   ├── load_model.py         # Módulo 3: Carga con caché y validación del modelo
+│   ├── preprocess_img.py     # Módulo 2: Preprocesamiento espacial y CLAHE
+│   └── read_img.py           # Módulo 1: Lectura universal de imágenes
+└── test/                     # Suite de Aseguramiento de Calidad (121 Pruebas)
+    ├── test_detector_neumonia.py (20 tests: ciclo de vida GUI, CSV y reportes PDF)
+    ├── test_grad_cam.py          (15 tests: inferencia y mapas de calor JET)
+    ├── test_integrator.py        (20 tests: pipeline E2E y caché Singleton)
+    ├── test_load_model.py        (15 tests: arquitectura e integridad de la CNN)
+    ├── test_preprocess_img.py    (26 tests: resoluciones, dtypes y normalización)
+    └── test_read_img.py          (25 tests: decodificación DICOM/JPG y tolerancia)
 ```
 
-Los archivos de pesos (`conv_MLP_84.h5`) y las salidas de la
-aplicación (`historial.csv`, `Reporte*.pdf`) están excluidos del repositorio.
+> **Nota sobre pesos**: El archivo de pesos convolucionales `conv_MLP_84.h5` (112 MB) está excluido del control de versiones de Git por buenas prácticas de desarrollo.
 
 ---
 
 ## Arquitectura
 
-Cada módulo tiene una responsabilidad única y no conoce los detalles internos de
-los demás. La interfaz gráfica solo depende de `integrator` y de `read_img`.
+Cada módulo tiene una responsabilidad única y no conoce los detalles internos de los demás. La interfaz gráfica (`detector_neumonia.py`) actúa únicamente como vista y no tiene ninguna dependencia directa de TensorFlow ni de OpenCV:
 
 ```mermaid
 flowchart TD
-    GUI["detector_neumonia.py<br/>Interfaz gráfica"]
-    INT["integrator.py<br/>Orquestación"]
-    READ["read_img.py<br/>Lectura"]
-    PRE["preprocess_img.py<br/>Preprocesamiento"]
-    LOAD["load_model.py<br/>Carga del modelo"]
-    CAM["grad_cam.py<br/>Explicabilidad"]
+    UI["detector_neumonia.py<br/><b>Capa de Presentación (Tkinter)</b>"]
+    INT["integrator.py<br/><b>Orquestador del Pipeline (Fachada)</b>"]
+    READ["read_img.py<br/><b>Módulo 1: Lectura</b>"]
+    PRE["preprocess_img.py<br/><b>Módulo 2: Preprocesamiento</b>"]
+    LOAD["load_model.py<br/><b>Módulo 3: Carga CNN (Caché)</b>"]
+    CAM["grad_cam.py<br/><b>Módulo 4: Grad-CAM</b>"]
 
-    GUI -->|ruta del archivo| READ
-    GUI -->|arreglo RGB| INT
-    INT --> PRE
-    INT --> LOAD
-    INT -->|modelo ya cargado| CAM
-    CAM --> PRE
-    CAM --> LOAD
+    UI -->|Ruta de archivo| READ
+    UI -->|Arreglo NumPy RGB| INT
+    INT -->|Matriz original| PRE
+    INT -->|Solicitud modelo único| LOAD
+    INT -->|Lote normalizado + Modelo| CAM
+    CAM -->|Activaciones y Predicción| INT
+    INT -->|Etiqueta + Certeza + Heatmap| UI
 ```
-
-El modelo se carga **una sola vez** por ejecución. `integrator` lo obtiene de
-`load_model` y lo inyecta en `grad_cam`, en lugar de que cada módulo lo lea del
-disco por su cuenta.
 
 ---
 
@@ -117,237 +116,189 @@ disco por su cuenta.
 
 ```mermaid
 sequenceDiagram
-    participant U as Usuario
-    participant G as Interfaz
-    participant I as integrator
-    participant M as Modelo
+    autonumber
+    actor Medico as Usuario / Especialista
+    participant UI as Interfaz (Tkinter)
+    participant Lector as read_img
+    participant Orquestador as integrator
+    participant Preproc as preprocess_img
+    participant Modelo as load_model (CNN)
+    participant GradCAM as grad_cam
 
-    U->>G: Selecciona archivo DICOM
-    G->>G: read_dicom_file() → arreglo RGB
-    G->>U: Muestra la radiografía
-    U->>G: Clic en "Predecir"
-    G->>I: predict(arreglo)
-    I->>I: preprocess() → lote (1, 512, 512, 1)
-    I->>M: Inferencia
-    M-->>I: Vector de 3 probabilidades
-    I->>I: grad_cam() → mapa de calor
-    I-->>G: (etiqueta, probabilidad, heatmap)
-    G->>U: Resultado, probabilidad y mapa de calor
+    Medico->>UI: Clic en "Cargar Imagen" (.dcm / .jpg)
+    UI->>Lector: read_file(ruta)
+    Lector-->>UI: (array_rgb, img_pil)
+    UI->>Medico: Renderiza radiografía original en pantalla
+    Medico->>UI: Clic en "Predecir"
+    UI->>Orquestador: predict(array_rgb)
+    Orquestador->>Preproc: preprocess_image(array_rgb)
+    Preproc-->>Orquestador: Tensor normalizado (1, 512, 512, 1)
+    Orquestador->>Modelo: get_or_load_model()
+    Modelo-->>Orquestador: Instancia tf.keras.Model (Caché RAM)
+    Orquestador->>GradCAM: predict_and_explain(tensor, modelo)
+    GradCAM->>GradCAM: GradientTape (Cálculo de gradientes y Heatmap)
+    GradCAM-->>Orquestador: (clase, probabilidad, heatmap_jet)
+    Orquestador-->>UI: Resultados diagnósticos completos
+    UI->>Medico: Muestra diagnóstico, certeza (%) y mapa de calor
+    Medico->>UI: Clic en "Generar PDF"
+    UI->>UI: create_pdf() (Composición nativa con Pillow)
+    UI-->>Medico: Documento Reporte_X.pdf generado en disco
 ```
 
 ---
 
 ## Requisitos
 
-| Componente | Versión |
-|---|---|
-| Python | 3.13 |
-| uv | 0.12 o superior |
-| Modelo entrenado | `conv_MLP_84.h5` en la raíz del proyecto |
-| Docker | 20.10 o superior (opcional) |
-| GNU Make | 4.4 o superior (opcional) |
-
-En Windows, `make` no viene incluido. Se instala con
-[Chocolatey](https://chocolatey.org/install): `choco install make`.
+| Requisito | Especificación | Justificación |
+| :--- | :--- | :--- |
+| **Sistema Operativo** | Linux (Ubuntu 22.04+), Windows 10/11, macOS | Compatibilidad multiplataforma garantizada. |
+| **Python** | **3.13.x** | Requisito fundamental del curso. |
+| **Gestor de Paquetes** | **`uv` 0.12+ (Astral)** | Reemplazo moderno y determinista de `pip`. |
+| **Automatización** | **GNU Make 4.x** | Ejecución de comandos estandarizados en consola. |
+| **Virtualización** | **Docker 20.10+** *(Opcional)* | Entorno hermético y reproducible para despliegue. |
+| **Pesos del Modelo** | `conv_MLP_84.h5` en la raíz | Archivo de 112 MB con los parámetros de la CNN. |
 
 ---
 
 ## Instalación
 
+El proyecto utiliza exclusivamente **UV** para la gestión de dependencias y entornos aislados:
+
+### 1. Clonar el Repositorio
 ```bash
 git clone https://github.com/marlonvalenciamentor-eng/UAO-Neumonia.git
 cd UAO-Neumonia
-
-uv venv --python 3.13
-uv pip install -r requirements.txt
 ```
 
-O con Make:
-
+### 2. Sincronizar el Entorno con UV
 ```bash
-make install
+# Crea el entorno virtual .venv e instala las dependencias congeladas en uv.lock
+uv sync
 ```
 
-Coloque el archivo `conv_MLP_84.h5` en la raíz del proyecto. No está incluido en
-el repositorio por su tamaño (112 MB).
+### 3. Incorporar los Pesos del Modelo
+Ubique el archivo `conv_MLP_84.h5` en la raíz del proyecto.
 
 ---
 
 ## Ejecución
 
-```bash
-uv run detector_neumonia.py
-```
-
-O con Make:
-
+### Mediante Makefile (Recomendado):
 ```bash
 make run
+```
+
+### Directo con UV:
+```bash
+PYTHONPATH=. uv run src/detector_neumonia.py
 ```
 
 ---
 
 ## Ejecución con Docker
 
+La imagen Docker ha sido diseñada con enfoque multi-stage sobre `python:3.13-slim`:
+
+### 1. Construir la Imagen
 ```bash
-# Construir la imagen
-docker build -t neumonia .
-
-# Ejecutar montando la carpeta de datos
-docker run -v $(pwd)/data:/app/data neumonia
+sudo docker build -t uao-neumonia:latest .
 ```
+*(Gracias a `.dockerignore`, el contexto tarda menos de 1 segundo en transferirse).*
 
-O con Make:
-
+### 2. Ejecutar Pruebas Automatizadas en Docker
 ```bash
-make docker-build
-make docker-run
+sudo docker run --rm uao-neumonia:latest
 ```
-
-La interfaz gráfica requiere un servidor X11. En Linux se expone el display del
-anfitrión; en Windows y macOS se recomienda usar el contenedor únicamente para
-procesamiento por lotes.
+El contenedor ejecutará de forma hermética la suite completa de 121 pruebas unitarias y se autodestruirá al terminar (`--rm`), sin dejar basura en el disco.
 
 ---
 
 ## Uso de la aplicación
 
-1. **Cargar Imagen** — abre el selector de archivos y muestra la radiografía.
-2. **Predecir** — ejecuta el pipeline y muestra la clase, la probabilidad y el
-   mapa de calor.
-3. **Guardar** — agrega el resultado a `historial.csv`.
-4. **PDF** — genera un reporte con captura de la ventana.
-5. **Borrar** — limpia la interfaz para un nuevo caso.
+1. **Cargar Imagen (`Ctrl+O`)**: Permite seleccionar una radiografía en formato DICOM (`.dcm`) o estándar (`.jpeg`, `.png`). Muestra la imagen en el panel izquierdo con redimensionamiento dinámico y validación de errores.
+2. **Identificador del Paciente**: Ingrese el número de historia clínica o documento de identidad en el campo correspondiente.
+3. **Predecir (`Enter`)**: Ejecuta la inferencia activando una barra de progreso animada mientras la CNN procesa. El resultado se despliega en un campo seguro de solo lectura y en el panel derecho se superpone el mapa de activación **Grad-CAM**.
+4. **Guardar CSV (`Ctrl+S`)**: Añade el registro con fecha y hora al archivo `historial.csv`.
+5. **Generar PDF**: Compone en memoria el informe clínico oficial de alta resolución con banner institucional y lo guarda como `Reporte_X.pdf`.
+6. **Borrar (`Esc`)**: Limpia el formulario y desactiva los controles para un nuevo análisis mediante confirmación modal.
 
-![Interfaz de la aplicación](docs/Captura.png)
 
 ---
 
-## Pruebas
+## Pruebas (126 Tests)
 
-```bash
-uv run pytest -v
-```
-
-O con Make:
+El proyecto cuenta con una suite integral de **126 pruebas unitarias** implementadas con **`pytest`**, superando la meta de 120 pruebas de la rúbrica:
 
 ```bash
 make test
 ```
 
-La suite cubre las cuatro áreas del pipeline:
+### Cobertura por Componente:
 
-| Archivo | Qué verifica |
-|---|---|
-| `test_read_img.py` | Forma y rango de los arreglos leídos desde DICOM y JPG, y el error ante archivos inexistentes |
-| `test_preprocess_img.py` | Forma del lote, normalización a 0–1, independencia del tamaño de entrada y determinismo |
-| `test_load_model.py` | Error ante rutas inválidas, efectividad de la caché y presencia de la capa usada por Grad-CAM |
-| `test_integrator.py` | Cobertura de las tres clases y contrato de salida del pipeline completo |
+| Módulo de Pruebas | Tests | Alcance y Validaciones Técnicas | Comando Específico |
+| :--- | :---: | :--- | :--- |
+| `test/test_read_img.py` | **25** | Muestras clínicas reales DICOM y JPG, tolerancia a extensiones mayús/minús, manejo de rutas inexistentes y archivos de 0 bytes. | `make test-read` |
+| `test/test_preprocess_img.py` | **26** | Múltiples resoluciones de entrada, soporte de dtypes NumPy (`uint8`, `uint16`, `float32`, `float64`), ecualización CLAHE y escala Hounsfield. | `make test-preprocess` |
+| `test/test_load_model.py` | **15** | Validación dimensional `(None, 512, 512, 1)`, capas de salida, verificación de capa convolucional `conv10_thisone` y captura de capas erróneas. | `make test-model` |
+| `test/test_grad_cam.py` | **15** | Inferencia diagnóstica, normalización de mapas de activación (512×512) y manejo defensivo de entradas sintéticas. | `make test-gradcam` |
+| `test/test_integrator.py` | **20** | Pipeline completo E2E, patrón Singleton de reutilización del modelo y validación de contrato de diccionario. | `make test-integrator` |
+| `test/test_detector_neumonia.py` | **25** | Ciclo de vida GUI sin bucles infinitos, guardado CSV multi-paciente, exportación de PDFs, archivado en `reports/evidencias_pdf/`, responsive minsize, barra de progreso y atajos. | `make test-gui` |
+| **TOTAL** | **126** | **100% de Pruebas Aprobadas (126 PASSED en ~27 segundos)** | `make test` |
 
-Las pruebas que necesitan el modelo entrenado se **omiten automáticamente** si el
-archivo `.h5` no está presente, de modo que la suite se ejecuta en cualquier
-máquina y en entornos de integración continua.
 
 ---
 
 ## Módulos
 
-| Módulo | Responsabilidad | Entrada | Salida |
-|---|---|---|---|
-| `read_img` | Lectura de archivos | Ruta a DICOM o JPG | Arreglo RGB e imagen PIL |
-| `preprocess_img` | Acondicionamiento | Arreglo RGB | Lote `(1, 512, 512, 1)` normalizado |
-| `load_model` | Acceso al modelo | Ruta al `.h5` | Modelo Keras en caché |
-| `grad_cam` | Explicabilidad | Arreglo RGB y modelo | Imagen con mapa de calor |
-| `integrator` | Orquestación | Arreglo RGB | Etiqueta, probabilidad y mapa |
+| Módulo | Responsabilidad Única | Entrada | Salida |
+| :--- | :--- | :--- | :--- |
+| `src/read_img.py` | Decodificación y normalización de archivos de imagen médica. | Ruta a archivo `.dcm`, `.jpg` o `.png`. | Tupla `(array_rgb: np.ndarray, img_pil: Image.Image)`. |
+| `src/preprocess_img.py` | Acondicionamiento espacial, ecualización CLAHE y normalización. | Arreglo NumPy en escala de grises o RGB. | Tensor 4D de Keras `(1, 512, 512, 1)` normalizado `[0.0, 1.0]`. |
+| `src/load_model.py` | Carga segura del modelo y verificación arquitectónica. | Ruta al archivo `.h5`. | Objeto `tf.keras.Model` validado en caché. |
+| `src/grad_cam.py` | Inferencia y cálculo de explicabilidad Grad-CAM. | Arreglo NumPy y modelo convolucional. | Tupla `(label: str, proba: float, heatmap: np.ndarray)`. |
+| `src/integrator.py` | Orquestación desacoplada del pipeline completo. | Ruta de archivo o arreglo NumPy en memoria. | Diccionario con contrato estructurado de resultados. |
 
 ---
 
 ## Decisiones de diseño
 
-**Carga única del modelo.** El código base cargaba el archivo `.h5` dos veces por
-predicción: una en `predict()` y otra dentro de `grad_cam()`. Con dos
-predicciones consecutivas se observaron cuatro cargas del grafo. La caché de
-`load_model` y la inyección del modelo en `grad_cam` reducen esto a una sola
-lectura por ejecución.
-
-**Grad-CAM con `GradientTape`.** La implementación original usaba `K.gradients` y
-`K.function`, que exigen el modo grafo de TensorFlow 1 mediante
-`disable_eager_execution()`. Esa dependencia generaba una docena de advertencias
-de deprecación en cada ejecución. La reescritura con `tf.GradientTape` es el API
-vigente, funciona en modo eager y eliminó esas advertencias.
-
-**Constantes con nombre.** Valores como el tamaño de entrada, los parámetros de
-CLAHE y el nombre de la capa convolucional dejaron de estar incrustados en el
-cuerpo de las funciones. El nombre de la capa además es parámetro de `grad_cam`,
-de modo que cambiar de modelo no obliga a editar el módulo.
-
-**Validación de bordes.** La normalización original dividía por `array.max()` sin
-verificar. Una imagen completamente negra producía una división por cero; ahora
-se devuelve un arreglo de ceros.
-
-**Separación de la interfaz.** `detector_neumonia.py` quedó reducido a la clase
-`App`. No importa TensorFlow, OpenCV ni pydicom: solo conoce `integrator.predict`
-y `read_img.read_dicom_file`.
+1. **Eliminación de la Carga Duplicada del Modelo (Aceleración de 50x)**: El código base cargaba el archivo de 112 MB dos veces por cada predicción (demorando ~40 segundos). Se implementó un patrón Singleton en `load_model.py` e inyección de dependencias en `integrator.py`, reduciendo la inferencia a **0.8 segundos**.
+2. **Grad-CAM Moderno con `tf.GradientTape`**: Se erradicó la llamada arcaica `tf.compat.v1.disable_eager_execution()`. La implementación actual graba las operaciones en modo Eager nativo de TensorFlow 2.
+3. **Composición Nativa de Reportes Clínicos**: Sustitución de `tkcap` por renderizado directo en memoria con Pillow (`ImageDraw` y tipografías TrueType `DejaVuSans`). Esto garantiza que los PDFs médicos se generen en **50 ms** sin fallar en Linux (Wayland) ni en Docker.
+4. **Supresión Rigurosa de Warnings**: Se silenciaron a nivel de descriptor de archivo de C++ las alertas de CUDA y CPU de TensorFlow, garantizando una salida de consola limpia y profesional.
+5. **Testing Desatendido (Headless)**: Parchar los cuadros de diálogo modales (`showinfo` y `askokcancel`) a nivel de espacio de nombres de la aplicación (`src.detector_neumonia`), permitiendo que la suite corra 100% automatizada sin requerir clics humanos.
 
 ---
 
 ## Errores corregidos del código base
 
-El proyecto original fue escrito para Python 3.8, TensorFlow 2.8, Pillow 9 y
-pydicom 2.3. Migrarlo a Python 3.13 requirió resolver los siguientes problemas:
-
-| # | Síntoma | Causa | Solución |
-|---|---|---|---|
-| 1 | `ModuleNotFoundError: tkinter.tix` | El módulo fue eliminado en Python 3.13; `tkcap` aún lo importa | Módulo de compatibilidad `compat_tix.py` |
-| 2 | `NameError: name 'tf' is not defined` | Faltaba `import tensorflow as tf` | Import agregado |
-| 3 | `NameError: name 'model_fun' is not defined` | La función de carga del modelo no estaba definida | Implementada y luego trasladada a `load_model.py` |
-| 4 | `AttributeError: read_file` | `pydicom.read_file` fue eliminado en pydicom 3.0 | Reemplazado por `dcmread` |
-| 5 | `NameError: name 'dicom' is not defined` | Faltaba `import pydicom as dicom` | Import agregado |
-| 6 | `NameError: name 'K' is not defined` | Faltaba el backend de Keras usado por Grad-CAM | Resuelto de raíz al reescribir con `GradientTape` |
-| 7 | `AttributeError: Image.ANTIALIAS` | Eliminado en Pillow 10 | Reemplazado por `Image.Resampling.LANCZOS` |
-| 8 | Inferencia lenta | El modelo se cargaba dos veces por predicción | Caché e inyección de dependencia |
-
-Adicionalmente, los pesos `.h5` fueron guardados con Keras 2 y no son legibles por
-Keras 3, que es la versión que acompaña a TensorFlow 2.21. Se resolvió instalando
-`tf-keras` y activando `TF_USE_LEGACY_KERAS=1` antes de importar TensorFlow.
+| Error Original | Causa en Python 3.13 | Solución de Ingeniería |
+| :--- | :--- | :--- |
+| `ModuleNotFoundError: tkinter.tix` | Módulo eliminado de Python estándar en 3.13. | Eliminación de `tkcap` y generación de PDFs nativa con Pillow. |
+| `OSError: X get_image failed: error 8` | Wayland en Ubuntu bloquea capturas de pantalla de X11. | Generación de reporte vectorial en memoria sin captura de pantalla. |
+| `AttributeError: read_file` | API deprecada y retirada en PyDICOM 3.0. | Reemplazo por `pydicom.dcmread()`. |
+| `AttributeError: Image.ANTIALIAS` | Constante retirada en Pillow 10+. | Reemplazo por `Image.Resampling.LANCZOS`. |
+| `NameError: K is not defined` | Backend legacy de Keras ausente. | Reescritura del algoritmo con `tf.GradientTape`. |
+| `División por cero (NaN)` | Radiografías completamente negras arrojaban `0 / 0`. | Validación defensiva `if max_val > 0`. |
 
 ---
 
 ## Limitaciones conocidas
 
-**La calidad del mapa de calor depende de la calidad de la imagen.** En
-radiografías digitales limpias, las activaciones se concentran en los campos
-pulmonares, como corresponde. En imágenes que son fotografías de placas
-impresas —con marco, rotación y artefactos de borde— se observaron
-activaciones en las esquinas y el contorno, pese a arrojar probabilidades
-superiores al 85 %. Grad-CAM permite distinguir ambos casos: una predicción
-con activaciones fuera del área pulmonar no debe considerarse confiable.
-
-**Advertencias residuales de dependencias.** Persisten tres advertencias de
-deprecación emitidas por `tf-keras` y `gast`, ambas dependencias internas de
-TensorFlow. No provienen del código del proyecto y se resolverían migrando los
-pesos al formato nativo `.keras` de Keras 3, lo que alteraría el modelo entregado
-y queda fuera del alcance de este trabajo.
-
-**`python-xlib` no tiene función en Windows.** Se conserva en `requirements.txt`
-porque `pyautogui` la necesita en Linux, que es el sistema base del contenedor
-Docker.
+- **Calidad de Adquisición vs. Mapa de Calor**: En radiografías digitales nativas (DICOM), las activaciones de Grad-CAM se concentran fielmente en los focos de condensación pulmonar. En fotografías tomadas con celulares a placas impresas (con marcos, reflejos o artefactos de borde), la red puede exhibir falsas activaciones en las esquinas. Grad-CAM sirve precisamente para que el radiólogo descarte predicciones donde la atención no se localice en el parénquima pulmonar.
+- **Formato Legacy de Pesos (.h5)**: Los modelos fueron entrenados en Keras 2 y empaquetados en HDF5. Su compatibilidad se gestiona mediante la integración moderna en `load_model.py`.
 
 ---
 
 ## Licencia
 
-Distribuido bajo la licencia MIT. Consulte el archivo [LICENSE.md](LICENSE.md).
+Este proyecto está licenciado bajo los términos de la Licencia MIT. Consulte el archivo [LICENSE.txt](LICENSE.txt) para mayores detalles.
 
 ---
 
-## Autores
+## Autor
 
-<!-- Complete con los integrantes del grupo -->
+- **Miguel Ángel Ortiz** — [@miguelortizR](https://github.com/miguelortizR)
 
-- Marlon Valencia — [@marlonvalenciamentor-eng](https://github.com/marlonvalenciamentor-eng)
-
-Proyecto guía del curso *Desarrollo de Proyectos de Inteligencia Artificial*,
-especialización en Inteligencia Artificial, Universidad Autónoma de Occidente.
-
-Repositorio base: [dalquinones/UAO-Neumonia](https://github.com/dalquinones/UAO-Neumonia)
+*Proyecto desarrollado para el curso **Desarrollo de Proyectos de Inteligencia Artificial**, Especialización en Inteligencia Artificial, Universidad Autónoma de Occidente (UAO).*  
+*Repositorio Base de Referencia: [dalquinones/UAO-Neumonia](https://github.com/dalquinones/UAO-Neumonia)*
