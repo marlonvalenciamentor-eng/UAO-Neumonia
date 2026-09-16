@@ -13,12 +13,12 @@ RESPONSABILIDAD ÚNICA:
 =============================================================================
 """
 
+import os
 import csv
-import cv2
 import datetime
-import csv
+import uuid
+import numpy as np
 import cv2
-import datetime
 from tkinter import Tk, StringVar, END
 from tkinter import ttk, filedialog
 from tkinter.messagebox import askokcancel, showinfo, showerror, showwarning
@@ -278,6 +278,7 @@ class App:
             # Limpiar estado anterior para evitar consistencia cruzada (Devin Review)
             self.result_var.set("")
             self.proba_var.set("")
+            self.label_img1.configure(image=self.img1_tk, text="")
             self.label_img2.configure(image="", text="[ Sin mapa de activación ]\n\nEl análisis Grad-CAM aparecerá tras la predicción")
             self.img2_tk = None
             self.heatmap = None
@@ -369,9 +370,11 @@ class App:
             report.paste(pil_heat, (540, 180))
             draw.text((540, 615), "Explicabilidad Grad-CAM (Region Pulmonar)", fill=(50, 50, 50), font=font_labels)
 
-        # Generar nombre único usando timestamp para evitar sobrescritura (Devin Review)
+        # Generar nombre único usando timestamp
+        patient_id = self.patient_id_var.get().strip() or "S_N"
         timestamp_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        pdf_path = f"Reporte_{patient_id}_{timestamp_str}.pdf"
+        unique_suffix = str(uuid.uuid4())[:6]
+        pdf_path = f"Reporte_{patient_id}_{timestamp_str}_{unique_suffix}.pdf"
         report.save(pdf_path)
         showinfo(title="PDF Generado", message=f"Reporte clínico generado con éxito:\n{pdf_path}")
 
